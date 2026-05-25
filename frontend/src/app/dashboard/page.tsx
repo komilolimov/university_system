@@ -1,8 +1,13 @@
 ﻿import { LogoutButton } from "@/features/auth/logout";
 import { StudentProfileOverview } from "@/widgets/student-profile";
 import { EnrollmentList } from "@/widgets/my-enrollments";
+import { AdminOverview } from "@/widgets/admin-dashboard";
+import { getJwtPayload } from "@/shared/auth/jwt";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const payload = await getJwtPayload();
+  const role = payload?.role || "Student";
+  
   return (
     <main className="fsd-container mx-auto my-16 max-w-6xl flex flex-col gap-8 px-4">
       <header className="flex justify-between items-end border-b border-gray-200 pb-4">
