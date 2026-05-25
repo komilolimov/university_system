@@ -1,6 +1,14 @@
 ﻿import { cookies } from "next/headers";
 
-export async function getJwtPayload() {
+export interface JwtPayload {
+  sub?: string;
+  exp?: number;
+  role?: string;
+  user_type?: string;
+  [key: string]: any;
+}
+
+export async function getJwtPayload(): Promise<JwtPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
   if (!token) return null;
@@ -8,7 +16,13 @@ export async function getJwtPayload() {
   try {
     const payloadBase64 = token.split(".")[1];
     const payloadJson = Buffer.from(payloadBase64, "base64").toString();
-    return JSON.parse(payloadJson);
+    const payload = JSON.parse(payloadJson);
+    
+    if (!payload.role) {
+      payload.role = "Student";
+    }
+    
+    return payload;
   } catch (e) {
     return null;
   }
