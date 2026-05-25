@@ -7,7 +7,7 @@ interface CourseCardProps {
   course: Course;
 }
 
-export const CourseCard = ({ course }: CourseCardProps) => {
+export const CourseCard = ({ course, actionSlot }: CourseCardProps) => {
   return (
     <div className="border border-gray-200 rounded-lg p-6 flex flex-col gap-4">
       <div className="flex flex-col gap-1">
