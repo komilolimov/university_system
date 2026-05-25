@@ -11,7 +11,19 @@ export const EnrollmentList = async () => {
     params: { query: { student_id: studentId } }
   });
 
-  if (!enrollments || enrollments.length === 0) return <div>No enrollments</div>;
+  if (!enrollments || enrollments.length === 0) {
+    return (
+      <div className="flex flex-col gap-6 w-full">
+        <h2 className="text-2xl font-bold border-b border-gray-900 pb-2 uppercase tracking-widest text-gray-900">
+          My Enrollments
+        </h2>
+        <div className="border border-gray-200 p-8 flex flex-col gap-2 items-center justify-center min-h-[200px]">
+          <h3 className="text-xl font-bold text-gray-900">No active enrollments</h3>
+          <p className="text-gray-500 font-medium tracking-wide">You are not enrolled in any courses yet.</p>
+        </div>
+      </div>
+    );
+  }
 
   const enrichedEnrollments = await Promise.all(
     enrollments.map(async (enr) => {
@@ -30,12 +42,17 @@ export const EnrollmentList = async () => {
   );
 
   return (
-    <div>
-      {enrichedEnrollments.map(({ enrollment, offering, course }) => 
-        (offering && course) ? (
-          <EnrollmentCard key={enrollment.offering_id} enrollment={enrollment} offering={offering} course={course} />
-        ) : null
-      )}
+    <div className="flex flex-col gap-6 w-full">
+      <h2 className="text-2xl font-bold border-b border-gray-900 pb-2 uppercase tracking-widest text-gray-900">
+        My Enrollments
+      </h2>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {enrichedEnrollments.map(({ enrollment, offering, course }) => 
+          (offering && course) ? (
+            <EnrollmentCard key={enrollment.offering_id} enrollment={enrollment} offering={offering} course={course} />
+          ) : null
+        )}
+      </div>
     </div>
   );
 };
