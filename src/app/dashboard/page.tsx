@@ -11,13 +11,15 @@ export default function DashboardPage() {
         </div>
         <LogoutButton />
       </header>
-      <section className="flex flex-col gap-8">
-        <StudentProfileOverview />
-        <div className="flex flex-col gap-4 border border-gray-200 p-6">
-          <h2 className="text-2xl font-semibold">Your Overview</h2>
-          <p className="text-gray-600">Your enrolled courses and updates will appear here.</p>
-        </div>
-      </section>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <aside className="md:col-span-1">
+          <StudentProfileOverview />
+        </aside>
+        <section className="md:col-span-2 flex flex-col gap-4 border border-gray-200 p-6">
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">Your Enrolled Courses</h2>
+          <p className="text-gray-500 font-medium">Course data will be displayed here in the future.</p>
+        </section>
+      </div>
     </main>
   );
 }
