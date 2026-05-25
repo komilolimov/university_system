@@ -3,6 +3,7 @@
 type Course = components["schemas"]["CourseCatalogRead"];
 
 interface CourseCardProps {
+  actionSlot?: React.ReactNode;
   course: Course;
 }
 
