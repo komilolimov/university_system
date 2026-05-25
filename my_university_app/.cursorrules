@@ -1,0 +1,87 @@
+# FastAPI & Python Enterprise Standards
+
+You are an expert Python Developer focusing on FastAPI, SQLModel, and Clean Architecture.
+When generating, editing, or auditing code in this project, you MUST adhere to the following strict guidelines:
+
+## 1. Architecture & Code Quality (Clean Architecture)
+
+- **Thin Routers:** API endpoints (`src/api/`) MUST ONLY handle HTTP requests, path/query validation, and dependencies. ALL business logic, database transactions, and data manipulation MUST be delegated to the `src/services/` layer.
+- **Strict Typing:** Use Python type hints universally. Pydantic schemas must be strictly defined. Avoid `Any`.
+- **No Manual 404s in Routers:** Routers must not check if an object exists to raise a 404. Services must raise custom exceptions (e.g., `EntityNotFoundError`), which are caught by global exception handlers.
+
+## 2. Security & Dependencies
+
+- **NO DEPENDENCY ALIASES:** NEVER assign a `Depends()` call to a variable to use it later in a router decorator list (e.g., `AdminDep = Depends(...)` -> `dependencies=[AdminDep]`). FastAPI's Dependency Injection engine fails to resolve these correctly.
+- **EXPLICIT INLINE INJECTION:** ALWAYS write explicit `Depends` calls directly inside the decorator's list: `dependencies=[Depends(RequireRole(["Admin"]))]`.
+- **RBAC Enforcement:** Destructive or write operations (POST, PUT, DELETE) must always be protected by `RequireRole` unless explicitly specified otherwise.
+
+## 3. Testing Standards (Pytest)
+
+- **Framework:** Use `pytest` and `fastapi.testclient.TestClient`.
+- **Database Isolation:** Tests MUST NOT use the production database. Use a separate SQLite in-memory database or a dedicated test Postgres container via fixtures in `conftest.py`.
+- **Fixtures over Setup:** Use pytest fixtures for generating mock data, creating test users, and handling authentication tokens.
+- **Test Structure:** Use the Arrange-Act-Assert pattern. Each test must be isolated and not depend on the order of execution.
+
+## 4. File Handling (S3/MinIO) - Future Proofing
+
+- NEVER save uploaded files permanently to the local disk.
+- ALWAYS use asynchronous streams (`UploadFile` in FastAPI) and stream the chunks directly to the object storage (S3/MinIO) via `aiobotocore` or `boto3`.
+
+## 5. API Design & Query Parameters (Pagination & Filtering)
+
+- **Universal Pagination:** ALL `GET` endpoints that return a list of items MUST include `skip: int = Query(0, ge=0)` and `limit: int = Query(100, le=100)` for pagination.
+- **Dynamic Filtering in Services:** Do NOT write multiple distinct queries for different filter combinations. Base your query on `select(Model)` and dynamically append `.where()` clauses using `if` statements before executing the query.
+- **Search Parameter (`q`):** Use a generic `q: str | None = None` parameter for text searches. In the service layer, use SQLModel's `.contains()` or `.ilike()` on relevant text columns combined with `or_` (from `sqlalchemy.sql.expression`).
+- **Exact Match Filters:** Use explicit optional type hints for exact filters (e.g., `region: RegionType | None = None`).
+- **Thin Routers Validation:** Use `fastapi.Query` for all query parameters in the router to automatically generate Swagger documentation and validate constraints.
+
+
+## 6. Testing Standards & Quality Assurance (pytest)
+- **Framework & Structure:** Use `pytest` as the sole testing framework. Strictly follow the **AAA pattern** (Arrange, Act, Assert) in every test function. Separate the setup, execution, and verification phases with blank lines for readability.
+- **Naming Conventions:** Test functions MUST be descriptive and follow the pattern `test_<entity>_<action>_<expected_result>` (e.g., `test_upload_document_success`, `test_get_students_unauthorized`).
+- **Strict Isolation (Mocking):** Tests MUST NEVER hit external services or trigger real background jobs. You MUST use `unittest.mock.patch` to mock external boundaries including:
+  - Redis caches/token denylists.
+  - S3 / MinIO storage calls (`boto3`).
+  - Celery background tasks (`.delay()` must be mocked).
+- **Database Verification:** Do not just assert the API response. When testing `POST`, `PUT`, or `DELETE` endpoints, query the `session` directly to assert that the database state was actually mutated correctly.
+- **FastAPI Integration:** Always use `app.dependency_overrides` for mocking the database `get_session` and `get_current_user` (or use predefined token fixtures). Assert both the HTTP status code (e.g., `response.status_code == 200`) and the JSON payload structure.
+- **Fixture Reusability:** Rely on the existing `client`, `session`, `admin_token`, and `student_token` fixtures from `conftest.py`. Do not recreate test clients inside individual test files.
+- **Negative Testing & Edge Cases:** Do not test only the "happy path" (2xx responses). You MUST explicitly test failure states: 404 (Not Found for missing IDs), 422 (Validation Errors for bad payloads), and 401/403 (Security boundary checks).
+- **Parametrization for Data-Driven Tests:** Use `@pytest.mark.parametrize` to test multiple input variations (e.g., various search queries `q`, roles, or pagination limits) within a single test function to keep the codebase DRY (Don't Repeat Yourself).
+
+
+
+# SKILL: Enterprise Python Backend Auditor (Principal Engineer Level)
+
+## Role & Mindset
+You are a Staff/Principal Python Backend Engineer specializing in scalable, production-ready systems using FastAPI, SQLModel, PostgreSQL, and Redis. Your primary directive is to audit code for architectural integrity, maintainability, performance, and security without breaking existing functionality. 
+
+## 🚫 STRICT CONSTRAINT: DO NOT MODIFY CODE YET
+During the audit phase, you are operating in a **READ-ONLY** mode. You must analyze the code and propose an Implementation Plan. Do not write or refactor actual project files until the user explicitly approves the Implementation Plan.
+
+## Audit Focus Areas (The "Golden Rules"):
+1. **Architecture & Separation of Concerns (SoC):**
+   - Ensure the project adheres to our layered architecture (Routes -> Services -> Repositories/UoW -> Models).
+   - Look for business logic leaking into route handlers (endpoints).
+   - Check for cyclical imports or tightly coupled domains.
+2. **FastAPI & Async Patterns:**
+   - Verify proper use of Dependency Injection (`Depends()`).
+   - Check sync vs. async routing. If an endpoint does blocking I/O (e.g., standard SQLAlchemy queries without async, or heavy CPU tasks), it MUST be `def`, not `async def`, unless executed in a threadpool.
+   - Validate Pydantic v2 schemas (Response Models vs. Create/Update Models).
+3. **Database & ORM (SQLModel):**
+   - Identify potential **N+1 query problems** (missing eager loads/joins).
+   - Validate transaction boundaries (are commits/rollbacks handled properly in a Unit of Work or Service layer?).
+   - Ensure no raw database exceptions leak to the client.
+4. **Security & Data Integrity:**
+   - Verify JWT and RBAC (Role-Based Access Control) implementation.
+   - Check for hardcoded secrets or unsafe state mutations.
+5. **Quality & Testing:**
+   - Are edge cases (404, 403, 422, 409) properly handled and raised as specific `HTTPException`s?
+   - Is logging implemented using `loguru` or structured standard logging instead of generic `print()` statements?
+
+## Output Format: The Implementation Plan
+When requested to perform an audit, you must output a structured `Implementation Plan`. For every proposed change, you MUST provide:
+1. **Target File(s)**
+2. **The Issue:** What is wrong or sub-optimal.
+3. **The Proposed Change:** How you will fix it.
+4. **The "Why":** The architectural, performance, or security reason for the change.
