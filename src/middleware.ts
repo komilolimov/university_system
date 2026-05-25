@@ -9,9 +9,14 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
+  const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route));
 
   if (isAuthRoute && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (isProtectedRoute && !token) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
