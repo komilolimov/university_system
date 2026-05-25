@@ -1,4 +1,5 @@
 ﻿import { LogoutButton } from "@/features/auth/logout";
+import { StudentProfileOverview } from "@/widgets/student-profile";
 
 export default function DashboardPage() {
   return (
@@ -10,9 +11,12 @@ export default function DashboardPage() {
         </div>
         <LogoutButton />
       </header>
-      <section className="flex flex-col gap-4 border border-gray-200 p-6">
-        <h2 className="text-2xl font-semibold">Your Overview</h2>
-        <p className="text-gray-600">Your enrolled courses and updates will appear here.</p>
+      <section className="flex flex-col gap-8">
+        <StudentProfileOverview />
+        <div className="flex flex-col gap-4 border border-gray-200 p-6">
+          <h2 className="text-2xl font-semibold">Your Overview</h2>
+          <p className="text-gray-600">Your enrolled courses and updates will appear here.</p>
+        </div>
       </section>
     </main>
   );
