@@ -15,7 +15,7 @@ export const CourseList = async () => {
   return (
     <div className="flex flex-col gap-4">
       {data.map((course) => (
-        <CourseCard key={course.code} course={course} />
+        <CourseCard key={course.code} course={course} actionSlot={<EnrollButton courseId={course.id} />} />
       ))}
     </div>
   );
