@@ -18,7 +18,7 @@ export default function Home() {
           <p className="text-gray-500 font-medium">Browse and discover available degree programs and offerings.</p>
         </Link>
         <Link href="/login" className="border border-gray-300 p-8 flex flex-col gap-3 hover:border-black focus:border-black outline-none transition-colors group">
-          <h2 className="text-2xl font-bold text-gray-900 group-hover:text-black transition-colors">Student Login</h2>
+          <h2 className="text-2xl font-bold text-gray-900 group-hover:text-black transition-colors">Login</h2>
           <p className="text-gray-500 font-medium">Securely access your protected academic profile and records.</p>
         </Link>
         <Link href="/dashboard" className="border border-gray-300 p-8 flex flex-col gap-3 hover:border-black focus:border-black outline-none transition-colors group">
