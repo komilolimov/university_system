@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useTransition, useState } from "react";
 import { enrollInCourse } from "../actions";
@@ -33,7 +33,7 @@ export const EnrollButton = ({ courseId }: EnrollButtonProps) => {
         {isPending ? "Enrolling..." : "Enroll Now"}
       </button>
       {message && (
-        <p className={"text-sm font-semibold \"}>
+        <p className={`text-sm font-semibold ${message.includes('Success') ? 'text-green-700' : 'text-red-600'}`}>
           {message}
         </p>
       )}
