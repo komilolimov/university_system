@@ -1,29 +1,51 @@
-﻿"use server";
+"use server";
 
-import { apiClient } from "@/shared/api/client";
-import { setAuthCookies } from "@/shared/auth";
+import { redirect } from "next/navigation";
+import { setAuthCookies } from "@/shared/auth/session"; 
 
 export async function loginAction(prevState: any, formData: FormData) {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  // Добавляем .trim() чтобы убить случайные пробелы до и после текста!
+  const email = (formData.get("email") as string).trim();
+  const password = (formData.get("password") as string).trim();
 
-  if (!email || !password) {
-    return { error: "Email and password are required" };
+  // ПРОВЕРОЧНЫЙ ЛОГ: Посмотрим в терминале VS Code, что именно мы собрали
+  console.log("🔥 ОТПРАВЛЯЕМ НА БЭКЕНД:", `"${email}"`, `"${password}"`);
+
+  try {
+    const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8888";
+    // Убираем /api/v1 если он там случайно остался, чтобы не было дублей
+    const cleanBaseUrl = rawBaseUrl.replace(/\/api\/v1\/?$/, "");
+    const loginUrl = `${cleanBaseUrl}/api/v1/auth/login`;
+
+    console.log("🔥 ФЕТЧИМ URL:", loginUrl);
+    
+    const response = await fetch(loginUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log("🔥 СТАТУС ОШИБКИ:", response.status);
+      console.log("🔥 ТЕКСТ ОШИБКИ:", errorText);
+      return { error: `Ошибка ${response.status}: Проверь раскладку клавиатуры и данные` };
+    }
+
+    const data = await response.json();
+    
+    await setAuthCookies(data.access_token, data.refresh_token);
+
+  } catch (error) {
+    console.error("❌ FETCH FAILED:", error);
+    return { error: "Ошибка сети. Бэкенд запущен?" };
   }
 
-  const { data, error } = await apiClient.POST("/api/v1/auth/login", {
-    body: { email, password }
-  });
-
-  if (error) {
-    return { error: "Invalid credentials or server error" };
-  }
-
-  const resData = data as any;
-  if (resData?.access_token) {
-    await setAuthCookies(resData.access_token, resData.refresh_token || "Theme");
-    return { success: true };
-  }
-
-  return { error: "Invalid response from server" };
+  redirect("/dashboard");
 }
