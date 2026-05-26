@@ -1,11 +1,13 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 
 export interface JwtPayload {
   sub?: string;
+  email?: string;
+  name?: string;
   exp?: number;
   role?: string;
   user_type?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export async function getJwtPayload(): Promise<JwtPayload | null> {
@@ -23,7 +25,7 @@ export async function getJwtPayload(): Promise<JwtPayload | null> {
     }
     
     return payload;
-  } catch (e) {
+  } catch {
     return null;
   }
 }
