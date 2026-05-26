@@ -1,0 +1,12 @@
+{
+  "eval_id": 0,
+  "eval_name": "course-catalog-widget-ag-grid",
+  "prompt": "Make a 'Course Catalog' widget. It should be a Server Component that fetches a list of courses via apiClient and displays them in an AG-Grid table (title, code, credits), plus a column with a dummy 'Enroll' button.",
+  "assertions": [
+    {
+      "type": "script",
+      "name": "assert_course_catalog_rules.py",
+      "description": "Validates that the output contains no 'use client' in the Server Component, imports apiClient, uses ag-grid-react, and includes an index.ts file for FSD."
+    }
+  ]
+}

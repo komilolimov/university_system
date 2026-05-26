@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "Server Component does not use 'use client'",
+      "passed": true,
+      "evidence": "Correctly avoided 'use client'."
+    },
+    {
+      "text": "Uses apiClient for data fetching",
+      "passed": true,
+      "evidence": "Found apiClient usage in geist-fsd-ui-generator-workspace/iteration-1/eval-0/without_skill/outputs\\CourseAnalyticsOverview.tsx"
+    },
+    {
+      "text": "Uses Geist font and NOT Inter",
+      "passed": false,
+      "evidence": "Found Geist font in geist-fsd-ui-generator-workspace/iteration-1/eval-0/without_skill/outputs\\CourseAnalyticsOverview.tsx\nFound Inter font in geist-fsd-ui-generator-workspace/iteration-1/eval-0/without_skill/outputs\\CourseAnalyticsOverview.tsx"
+    },
+    {
+      "text": "Avoids generic vibrant background colors",
+      "passed": true,
+      "evidence": "Check passed."
+    },
+    {
+      "text": "Includes index.ts public API",
+      "passed": false,
+      "evidence": "No index.ts found."
+    }
+  ]
+}

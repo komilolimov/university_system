@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "update-api-token-feature",
+  "prompt": "Create an 'Update API Token' feature. It needs a client-side form using a mocked shadcn/ui input. Submission must call a Server Action that issues a PUT request via apiClient. Keep the design extremely clean, Linear-inspired, with high-contrast monochrome states and Geist typography.",
+  "assertions": [
+    {
+      "type": "script",
+      "name": "assert_feature_rules.py",
+      "description": "Validates FSD features, client/server boundaries, apiClient.PUT, Geist typography, and minimal styling."
+    }
+  ]
+}

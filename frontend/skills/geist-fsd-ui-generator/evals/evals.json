@@ -1,0 +1,31 @@
+{
+  "skill_name": "geist-fsd-ui-generator",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Build a 'Course Analytics Overview' widget. It should be a Server Component fetching metrics via apiClient. Display them using a minimal, Vercel-style stat card grid with subtle borders and Geist typography. Do not use colorful backgrounds or the Inter font.",
+      "expected_output": "A strict FSD Widget, functioning as an RSC, fetching via apiClient, styled with minimalist monochrome tailwind classes and Geist sans font.",
+      "files": [],
+      "assertions": [
+        {
+          "type": "script",
+          "name": "assert_widget_rules.py",
+          "description": "Validates RSC boundary, FSD exports, Geist font usage (no Inter), and apiClient usage."
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Create an 'Update API Token' feature. It needs a client-side form using a mocked shadcn/ui input. Submission must call a Server Action that issues a PUT request via apiClient. Keep the design extremely clean, Linear-inspired, with high-contrast monochrome states and Geist typography.",
+      "expected_output": "An FSD Feature containing a Client Component form, a Server Action doing a PUT, styling with Geist fonts, and strict module exports.",
+      "files": [],
+      "assertions": [
+        {
+          "type": "script",
+          "name": "assert_feature_rules.py",
+          "description": "Validates FSD features, client/server boundaries, apiClient.PUT, Geist typography, and minimal styling."
+        }
+      ]
+    }
+  ]
+}

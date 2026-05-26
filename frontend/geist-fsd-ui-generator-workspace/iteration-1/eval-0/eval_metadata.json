@@ -1,0 +1,12 @@
+{
+  "eval_id": 0,
+  "eval_name": "course-analytics-overview-widget",
+  "prompt": "Build a 'Course Analytics Overview' widget. It should be a Server Component fetching metrics via apiClient. Display them using a minimal, Vercel-style stat card grid with subtle borders and Geist typography. Do not use colorful backgrounds or the Inter font.",
+  "assertions": [
+    {
+      "type": "script",
+      "name": "assert_widget_rules.py",
+      "description": "Validates RSC boundary, FSD exports, Geist font usage (no Inter), and apiClient usage."
+    }
+  ]
+}

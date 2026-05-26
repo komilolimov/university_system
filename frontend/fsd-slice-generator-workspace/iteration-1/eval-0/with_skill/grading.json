@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "Server Component does not use 'use client'",
+      "passed": false,
+      "evidence": "Found 'use client' in fsd-slice-generator-workspace/iteration-1/eval-0/with_skill/outputs\\features\\enroll-course\\ui\\EnrollButton.tsx\nFound 'use client' in fsd-slice-generator-workspace/iteration-1/eval-0/with_skill/outputs\\widgets\\course-catalog\\ui\\CourseCatalogTable.tsx"
+    },
+    {
+      "text": "Uses apiClient for data fetching",
+      "passed": true,
+      "evidence": "Found apiClient usage in fsd-slice-generator-workspace/iteration-1/eval-0/with_skill/outputs\\widgets\\course-catalog\\ui\\CourseCatalog.tsx"
+    },
+    {
+      "text": "Uses AG-Grid for data table",
+      "passed": true,
+      "evidence": "Found AG-Grid usage in fsd-slice-generator-workspace/iteration-1/eval-0/with_skill/outputs\\widgets\\course-catalog\\ui\\CourseCatalogTable.tsx"
+    },
+    {
+      "text": "Includes index.ts public API",
+      "passed": true,
+      "evidence": "index.ts found."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "skill_name": "fsd-slice-generator",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Make a 'Course Catalog' widget. It should be a Server Component that fetches a list of courses via apiClient and displays them in an AG-Grid table (title, code, credits), plus a column with a dummy 'Enroll' button.",
+      "expected_output": "A widget that imports from entities/features, uses AG-Grid, and acts as a Server Component fetching via apiClient.",
+      "files": [],
+      "assertions": [
+        {
+          "type": "script",
+          "name": "assert_course_catalog_rules.py",
+          "description": "Validates that the output contains no 'use client' in the Server Component, imports apiClient, uses ag-grid-react, and includes an index.ts file for FSD."
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Write a 'Create School' feature. It should be a client-side form with a 'name' input that calls a Server Action upon submit. The Server Action must execute a POST request using apiClient.",
+      "expected_output": "A feature layer folder containing a 'use client' form component, a 'use server' actions file, and a POST request via apiClient.",
+      "files": [],
+      "assertions": [
+        {
+          "type": "script",
+          "name": "assert_create_school_rules.py",
+          "description": "Validates that the UI component uses 'use client', the action file uses 'use server', uses apiClient.POST, and includes an index.ts file for FSD."
+        }
+      ]
+    }
+  ]
+}

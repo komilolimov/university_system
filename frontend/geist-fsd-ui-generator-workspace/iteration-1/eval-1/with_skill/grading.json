@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "UI Component uses 'use client'",
+      "passed": true,
+      "evidence": "Found 'use client' in geist-fsd-ui-generator-workspace/iteration-1/eval-1/with_skill/outputs\\features\\update-api-token\\ui\\update-api-token-form.tsx"
+    },
+    {
+      "text": "Action file uses 'use server'",
+      "passed": true,
+      "evidence": "Found 'use server' in geist-fsd-ui-generator-workspace/iteration-1/eval-1/with_skill/outputs\\features\\update-api-token\\api\\update-token-action.ts"
+    },
+    {
+      "text": "Uses apiClient for PUT request",
+      "passed": true,
+      "evidence": "Found apiClient PUT usage in geist-fsd-ui-generator-workspace/iteration-1/eval-1/with_skill/outputs\\features\\update-api-token\\api\\update-token-action.ts\nFound apiClient PUT usage in geist-fsd-ui-generator-workspace/iteration-1/eval-1/with_skill/outputs\\shared\\api\\client.ts"
+    },
+    {
+      "text": "Uses Geist font",
+      "passed": true,
+      "evidence": "Found Geist font in geist-fsd-ui-generator-workspace/iteration-1/eval-1/with_skill/outputs\\features\\update-api-token\\ui\\update-api-token-form.tsx\nFound Geist font in geist-fsd-ui-generator-workspace/iteration-1/eval-1/with_skill/outputs\\shared\\ui\\button.tsx\nFound Geist font in geist-fsd-ui-generator-workspace/iteration-1/eval-1/with_skill/outputs\\shared\\ui\\input.tsx"
+    },
+    {
+      "text": "Includes index.ts public API",
+      "passed": true,
+      "evidence": "index.ts found."
+    }
+  ]
+}

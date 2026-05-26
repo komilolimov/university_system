@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "create-school-feature-actions",
+  "prompt": "Write a 'Create School' feature. It should be a client-side form with a 'name' input that calls a Server Action upon submit. The Server Action must execute a POST request using apiClient.",
+  "assertions": [
+    {
+      "type": "script",
+      "name": "assert_create_school_rules.py",
+      "description": "Validates that the UI component uses 'use client', the action file uses 'use server', uses apiClient.POST, and includes an index.ts file for FSD."
+    }
+  ]
+}

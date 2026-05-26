@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "UI Component uses 'use client'",
+      "passed": true,
+      "evidence": "Found 'use client' in fsd-slice-generator-workspace/iteration-1/eval-1/without_skill/outputs\\CreateSchoolForm.tsx"
+    },
+    {
+      "text": "Action file uses 'use server'",
+      "passed": true,
+      "evidence": "Found 'use server' in fsd-slice-generator-workspace/iteration-1/eval-1/without_skill/outputs\\createSchoolAction.ts"
+    },
+    {
+      "text": "Uses apiClient for POST request",
+      "passed": true,
+      "evidence": "Found apiClient POST usage in fsd-slice-generator-workspace/iteration-1/eval-1/without_skill/outputs\\createSchoolAction.ts"
+    },
+    {
+      "text": "Includes index.ts public API",
+      "passed": false,
+      "evidence": "No index.ts found."
+    }
+  ]
+}
