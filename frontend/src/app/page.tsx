@@ -1,31 +1,34 @@
-﻿import Link from "next/link";
+import Link from "next/link";
+import { BackgroundGlow } from "@/shared/ui";
 
 export default function Home() {
   return (
-    <main className="fsd-container mx-auto my-16 max-w-6xl flex flex-col gap-16 px-4">
-      <header className="flex flex-col gap-6 border-b border-gray-300 pb-12 text-center">
-        <h1 className="text-6xl font-extrabold tracking-tighter text-gray-900">
-          University Management System
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
+      <BackgroundGlow />
+      
+      <div className="z-10 flex flex-col items-center text-center px-4">
+        <div className="inline-flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs font-medium text-neutral-600 mb-8">
+          ✨ Introducing University System 2.0
+        </div>
+        
+        <h1 className="text-5xl sm:text-7xl tracking-tighter font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-neutral-900 to-neutral-500">
+          University Management<br />Reimagined.
         </h1>
-        <p className="text-xl text-gray-500 font-medium max-w-2xl mx-auto">
-          An advanced, strictly typed educational platform engineered for modern students.
+        
+        <p className="mt-6 text-lg text-neutral-500 max-w-[600px] text-center font-medium">
+          An advanced, strictly typed educational platform. Manage your institution with speed and precision.
         </p>
-      </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link href="/courses" className="border border-gray-300 p-8 flex flex-col gap-3 hover:border-black focus:border-black outline-none transition-colors group">
-          <h2 className="text-2xl font-bold text-gray-900 group-hover:text-black transition-colors">Course Catalog</h2>
-          <p className="text-gray-500 font-medium">Browse and discover available degree programs and offerings.</p>
-        </Link>
-        <Link href="/login" className="border border-gray-300 p-8 flex flex-col gap-3 hover:border-black focus:border-black outline-none transition-colors group">
-          <h2 className="text-2xl font-bold text-gray-900 group-hover:text-black transition-colors">Login</h2>
-          <p className="text-gray-500 font-medium">Securely access your protected academic profile and records.</p>
-        </Link>
-        <Link href="/dashboard" className="border border-gray-300 p-8 flex flex-col gap-3 hover:border-black focus:border-black outline-none transition-colors group">
-          <h2 className="text-2xl font-bold text-gray-900 group-hover:text-black transition-colors">Your Dashboard</h2>
-          <p className="text-gray-500 font-medium">View your active enrollments and manage your education.</p>
-        </Link>
-      </section>
+        <div className="flex flex-col sm:flex-row gap-4 mt-10">
+          <Link 
+            href="/login" 
+            className="bg-neutral-900 text-white hover:bg-neutral-800 h-10 px-6 rounded-md text-sm font-medium transition-colors flex items-center justify-center"
+          >
+            Sign In
+          </Link>
+         
+        </div>
+      </div>
     </main>
   );
 }
