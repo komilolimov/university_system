@@ -32,6 +32,7 @@ class StudentCreate(StudentBase):
 
 class StudentRead(StudentBase):
     id: int
+    permissions: list[str] = []
 
 class StudentUpdate(SQLModel):
     first_name: Optional[str] = None

@@ -51,6 +51,7 @@ class EmployeeCreate(EmployeeBase):
 
 class EmployeeRead(EmployeeBase):
     id: int
+    permissions: list[str] = []
 
 class EmployeeUpdate(SQLModel):
     first_name: Optional[str] = None
