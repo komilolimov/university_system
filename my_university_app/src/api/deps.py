@@ -66,9 +66,26 @@ class RequireRole:
         self.allowed_roles = allowed_roles
 
     def __call__(self, user: dict = Depends(get_current_user), lang: str = Depends(get_language)):
-        if user.get("role") not in self.allowed_roles:
+        role = user.get("role")
+        
+        print(f"--- DEBUG RBAC ---")
+        print(f"User payload: {user}")
+        print(f"Extracted role: {role}")
+        
+        if not role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=translate("Not enough permissions", lang)
             )
-        return user
+            
+        role_lower = role.lower()
+        allowed_roles_lower = [r.lower() for r in self.allowed_roles]
+        
+        # Admin bypasses all role/scope requirements
+        if role_lower in ["admin", "administrator"] or role_lower in allowed_roles_lower:
+            return user
+            
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=translate("Not enough permissions", lang)
+        )

@@ -23,13 +23,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
-def create_access_token(subject: str | int, user_type: str = None, role: str = None) -> str:
+def create_access_token(subject: str | int, user_type: str = None, role: str = None, email: str = None) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode = {"exp": expire, "sub": str(subject), "type": "access"}
     if user_type:
         to_encode["user_type"] = user_type
     if role:
         to_encode["role"] = role
+    if email:
+        to_encode["email"] = email
     return jwt.encode(to_encode, get_private_key(), algorithm=settings.ALGORITHM)
 
 def create_refresh_token(subject: str | int) -> str:

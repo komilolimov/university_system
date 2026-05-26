@@ -40,7 +40,16 @@ class AuthService:
         
         if not user:
             raise InvalidCredentialsError()
-        access_token = create_access_token(subject=str(user.id), user_type=user_type, role=role_title)
+            
+        print("🔥 [AUTH SERVICE] Generating token for:", email)
+        print("🔥 [AUTH SERVICE] Extracted Role:", role_title)
+            
+        access_token = create_access_token(
+            subject=str(user.id), 
+            user_type=user_type, 
+            role=role_title, 
+            email=user.email
+        )
         refresh_token = create_refresh_token(subject=str(user.id))
         
         return {
