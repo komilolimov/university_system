@@ -61,3 +61,18 @@ def test_logout(mock_redis, client: TestClient, admin_token: str):
     # Assert
     assert response.status_code == 200
     mock_redis.setex.assert_called_once()
+
+def test_get_me(client: TestClient, session: Session, admin_token: str):
+    # Arrange
+    setup_auth_db(session)
+    # Act
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    # Assert
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == "admin@test.com"
+    assert "hashed_password" not in data
+
