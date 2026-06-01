@@ -68,37 +68,7 @@ def change_employee_password(
     return {"Success": "Password changed successfully"}
 
 
-role_router = APIRouter(prefix="/roles", tags=["Roles"])
 
-
-@role_router.get("/", response_model=List[RoleRead])
-def get_roles(
-    session: SessionDep, 
-    current_user: CurrentUserDep, 
-    skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
-):
-    return role_service.get_all(session=session, skip=skip, limit=limit)
-
-
-@role_router.get("/{role_id}", response_model=RoleRead)
-def get_role(role_id: int, session: SessionDep, current_user: CurrentUserDep):
-    return role_service.get(session=session, id=role_id)
-
-
-@role_router.post("/", response_model=RoleRead, dependencies=[Depends(RequireRole(["Admin"]))])
-def create_role(obj_in: RoleCreate, session: SessionDep):
-    return role_service.create(session=session, obj_in=obj_in)
-
-
-@role_router.put("/{role_id}", response_model=RoleRead, dependencies=[Depends(RequireRole(["Admin"]))])
-def update_role(role_id: int, obj_in: RoleUpdate, session: SessionDep):
-    return role_service.update(session=session, id=role_id, obj_in=obj_in)
-
-
-@role_router.delete("/{role_id}", dependencies=[Depends(RequireRole(["Admin"]))])
-def delete_role(role_id: int, session: SessionDep):
-    return role_service.delete(session=session, id=role_id)
 
 
 experience_router = APIRouter(prefix="/employee-experiences", tags=["Employee Experiences"])

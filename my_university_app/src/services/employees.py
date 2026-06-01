@@ -2,7 +2,8 @@ from src.core.exceptions import EntityNotFoundError
 from typing import List, Optional
 from sqlmodel import Session, select
 from sqlalchemy import or_
-from src.repositories.employees import employee_repository, role_repository, employee_experience_repository
+from src.repositories.employees import employee_repository, employee_experience_repository
+from src.repositories.rbac import role_repository
 from src.models.employee import (
     Employee, EmployeeCreate, EmployeeUpdate,
     Role, RoleCreate, RoleUpdate,
