@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends
-from sqlmodel import Session
-from src.api.deps import get_session, get_current_user
-from src.api.deps import get_session
-from src.services.auth import AuthService
+from typing import Union
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, select
 from pydantic import BaseModel
 from fastapi.security import HTTPAuthorizationCredentials
-from src.api.deps import security
 
+from src.api.deps import get_session, get_current_user, security
+from src.services.auth import AuthService
+from src.models.student import Student, StudentRead
+from src.models.employee import Employee, EmployeeRead, Role
 
 router = APIRouter()
 
+# В идеале эту схему стоит вынести в отдельный файл со схемами (schemas.py)
 class LoginRequest(BaseModel):
     email: str
     password: str
@@ -27,10 +29,6 @@ def logout(
     auth_service = AuthService(session)
     return auth_service.logout(token=credentials.credentials)
 
-from typing import Union
-from fastapi import HTTPException
-from src.models.student import Student, StudentRead
-from src.models.employee import Employee, EmployeeRead
 
 @router.get("/me", response_model=Union[StudentRead, EmployeeRead])
 def get_me(
@@ -40,6 +38,10 @@ def get_me(
     user_id = int(current_user["user_id"])
     user_type = current_user["user_type"]
     role = current_user.get("role")
+    
+    # Безопасная проверка регистра, как в /permissions
+    role_lower = role.lower() if role else ""
+    is_admin = role_lower in ["admin", "administrator"]
     
     if user_type == "student":
         user = session.get(Student, user_id)
@@ -55,14 +57,15 @@ def get_me(
             raise HTTPException(status_code=404, detail="User not found")
             
         user_dict = user.model_dump()
-        if role in ["Admin", "Administrator"]:
-            user_dict["permissions"] = ["*"]
-        else:
-            user_dict["permissions"] = []
+        user_dict["permissions"] = ["*"] if is_admin else []
         return EmployeeRead(**user_dict)
 
+
 @router.get("/permissions")
-def get_permissions(current_user: dict = Depends(get_current_user)):
+def get_permissions(
+    current_user: dict = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
     role = current_user.get("role")
     
     if not role:
@@ -73,5 +76,9 @@ def get_permissions(current_user: dict = Depends(get_current_user)):
     if role_lower in ["admin", "administrator"]:
         return {"permissions": ["*"]}
         
-    # В будущем здесь можно подтягивать реальные права из БД
-    return {"permissions": []}
+    # Извлекаем роль и её права из БД
+    db_role = session.exec(select(Role).where(Role.title == role)).first()
+    if db_role and db_role.permissions:
+        return {"permissions": [p.name for p in db_role.permissions]}
+        
+    return {"permissions": []}
