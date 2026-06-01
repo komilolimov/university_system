@@ -7,6 +7,38 @@ from src.models.enums import RegionType
 if TYPE_CHECKING:
     from src.models.student import Student
 
+class RolePermissionLink(SQLModel, table=True):
+    __tablename__ = "role_permissions"
+    role_id: Optional[int] = Field(default=None, foreign_key="roles.id", primary_key=True)
+    permission_id: Optional[int] = Field(default=None, foreign_key="permissions.id", primary_key=True)
+
+class PermissionBase(SQLModel):
+    name: str = Field(unique=True, index=True)
+    description: Optional[str] = None
+    is_active: bool = Field(default=True) # <-- Новое поле (по умолчанию активно)
+
+# Добавляем возможность менять этот флаг через PUT/PATCH запросы
+class PermissionUpdate(SQLModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    is_active: Optional[bool] = None # <-- Чтобы админ мог "выключать" права
+
+class Permission(PermissionBase, TimestampMixin, table=True):
+    __tablename__ = "permissions"
+    id: Optional[int] = Field(default=None, primary_key=True)
+    
+    roles: list["Role"] = Relationship(back_populates="permissions", link_model=RolePermissionLink)
+
+class PermissionCreate(PermissionBase):
+    pass
+
+class PermissionRead(PermissionBase):
+    id: int
+
+class AssignPermissionRequest(SQLModel):
+    role_id: int
+    permission_id: int
+
 class RoleBase(SQLModel):
     title: str = Field(unique=True)
     is_faculty: bool = Field(default=False)
@@ -14,6 +46,8 @@ class RoleBase(SQLModel):
 class Role(RoleBase, TimestampMixin, table=True):
     __tablename__ = "roles"
     id: Optional[int] = Field(default=None, primary_key=True)
+    
+    permissions: list["Permission"] = Relationship(back_populates="roles", link_model=RolePermissionLink)
 
 class RoleCreate(RoleBase):
     pass
