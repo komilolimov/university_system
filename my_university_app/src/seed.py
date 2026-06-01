@@ -10,12 +10,12 @@ from src.models import (
     School, Department, ResearchLab, 
     Building, Room, Role, Employee, EmployeeExperience, 
     Student, AcademicTerm, DegreeProgram, ProgramRequirement, 
-    CourseCatalog, CourseOffering, Enrollment, StudentProgram
+    CourseCatalog, CourseOffering, Enrollment, StudentProgram,
+    Permission, RolePermissionLink # <-- ДОБАВЛЕНО
 )
 from src.models.enums import ProgramType, EnrollmentStatus, RoomType, RegionType
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-# Настраиваем Faker на Италию для аутентичности Университета Мессины!
 fake = Faker('it_IT')
 
 def get_hash(password: str) -> str:
@@ -29,7 +29,6 @@ def seed_data():
 
         print("Начинаю МАСШТАБНОЕ заполнение базы данных (University of Messina)...")
         print("Генерирую хэш пароля (это займет пару секунд)...")
-        # Генерируем один хэш для всех массовых пользователей, чтобы скрипт не работал полчаса
         bulk_password_hash = get_hash("password123")
 
         # ==========================================
@@ -52,18 +51,47 @@ def seed_data():
         session.commit()
 
         # ==========================================
+        # УРОВЕНЬ 0.5: Права доступа (RBAC)
+        # ==========================================
+        print("-> Уровень 0.5: Базовые Права доступа (Permissions)...")
+        
+        default_permissions = [
+            "students:read", "students:write", "students:delete",
+            "employees:read", "employees:write", "employees:delete",
+            "courses:read", "courses:write", "courses:delete",
+            "roles:read", "roles:write", "permissions:assign",
+            "data_analysis:read", "data_analysis:write" # Дополнительные права для учебных программ
+        ]
+
+        # 1. Создаем права (is_active=True применится автоматически из модели)
+        permissions = [
+            Permission(name=perm_name, description=f"Allows {perm_name}") 
+            for perm_name in default_permissions
+        ]
+        session.add_all(permissions)
+        session.commit() # Сохраняем, чтобы получить ID прав
+
+        # 2. Выдаем ВСЕ сгенерированные права только Администратору
+        admin_links = [
+            RolePermissionLink(role_id=role_admin.id, permission_id=p.id) 
+            for p in permissions
+        ]
+        session.add_all(admin_links)
+        session.commit()
+
+        # ==========================================
         # УРОВЕНЬ 1
         # ==========================================
         print("-> Уровень 1: Кафедры, Аудитории...")
         departments = []
         for school in schools:
-            for _ in range(4): # По 4 кафедры на школу (всего 20)
+            for _ in range(4):
                 dept = Department(name=f"Department of {fake.unique.bs().title()}", school_id=school.id)
                 departments.append(dept)
         
         rooms = []
         for building in buildings:
-            for i in range(10): # По 10 аудиторий в здании (всего 100)
+            for i in range(10):
                 room = Room(room_number=f"{building.code}-{i}00", capacity=random.choice([20, 50, 100, 200]), 
                             type=random.choice(list(RoomType)), building_id=building.id)
                 rooms.append(room)
@@ -76,12 +104,10 @@ def seed_data():
         # ==========================================
         print("-> Уровень 2: Сотрудники (100), Программы (50), Каталог курсов (200)...")
         employees = []
-        # Наши хардкодные пользователи
         admin_user = Employee(first_name="Admin", last_name="User", email="admin@unime.it", role_id=role_admin.id, department_id=departments[0].id, hire_date=date(2020, 1, 1), hashed_password=get_hash("admin123"))
         prof_turing = Employee(first_name="Alan", last_name="Turing", email="alan.turing@unime.it", role_id=role_prof.id, department_id=departments[0].id, hire_date=date(2022, 5, 10), hashed_password=get_hash("prof123"))
         employees.extend([admin_user, prof_turing])
 
-        # Массовка преподавателей
         for _ in range(98):
             emp = Employee(
                 first_name=fake.first_name(), last_name=fake.last_name(),
@@ -134,13 +160,10 @@ def seed_data():
         enrollments = []
         student_programs = []
 
-        # Каждому студенту даем программу и записываем на 3 случайных курса
         for student in students:
-            # Программа
             sp = StudentProgram(student_id=student.id, program_id=random.choice(programs).id, type=ProgramType.Primary_Major, declared_date=student.enrollment_date)
             student_programs.append(sp)
             
-            # Курсы (выбираем 3 уникальных)
             student_offerings = random.sample(offerings, 3)
             for off in student_offerings:
                 status = random.choice(list(EnrollmentStatus))
@@ -153,6 +176,7 @@ def seed_data():
 
         print("\n✅ УНИВЕРСИТЕТ УСПЕШНО СГЕНЕРИРОВАН!")
         print(f"Добавлено: 5 Школ, 20 Кафедр, 100 Аудиторий, 100 Преподавателей, 500 Студентов, ~1500 Зачислений.")
+        print(f"RBAC: Выдано {len(permissions)} прав Администратору.")
         print("=========================================")
         print("Хардкодные доступы работают как раньше:")
         print(f"Админ:   admin@unime.it   | admin123")
