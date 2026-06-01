@@ -60,9 +60,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    command: >
-      sh -c "alembic upgrade head && 
-             uvicorn src.main:app --host 0.0.0.0 --port 8000"
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000
 
   celery_worker:
     build:
@@ -80,8 +78,7 @@ services:
     depends_on:
       redis:
         condition: service_started
-    command: >
-      celery -A src.core.celery_app.celery_app worker --loglevel=info
+    command: celery -A src.core.celery_app.celery_app worker --loglevel=info
 
 volumes:
   postgres_data:
