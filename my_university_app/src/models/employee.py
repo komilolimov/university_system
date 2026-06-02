@@ -55,6 +55,10 @@ class RoleCreate(RoleBase):
 class RoleRead(RoleBase):
     id: int
 
+class RoleReadWithPermissions(RoleBase):
+    id: int
+    permissions: list[PermissionRead] = []
+
 class RoleUpdate(SQLModel):
     title: Optional[str] = None
     is_faculty: Optional[bool] = None
@@ -78,6 +82,7 @@ class Employee(EmployeeBase, TimestampMixin, table=True):
     hashed_password: str 
     
     advisees: list["Student"] = Relationship(back_populates="advisor")
+    role: Optional["Role"] = Relationship()
 
 class EmployeeCreate(EmployeeBase):
     # --- ДОБАВЛЕНО: Открытый пароль, который мы получаем при создании сотрудника ---

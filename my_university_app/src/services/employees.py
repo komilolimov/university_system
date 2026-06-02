@@ -2,6 +2,8 @@ from src.core.exceptions import EntityNotFoundError
 from typing import List, Optional
 from sqlmodel import Session, select
 from sqlalchemy import or_
+from fastapi import HTTPException, status
+
 from src.repositories.employees import employee_repository, employee_experience_repository
 from src.repositories.rbac import role_repository
 from src.models.employee import (
@@ -54,6 +56,16 @@ class EmployeeService:
 
     def create(self, session: Session, obj_in: EmployeeCreate) -> Employee:
         with UnitOfWork(session):
+            # Проверка уникальности Email
+            existing_email = session.exec(select(Employee).where(Employee.email == obj_in.email)).first()
+            if existing_email:
+                raise HTTPException(status_code=400, detail="Email already registered")
+                
+            # Проверка существования Role
+            role = role_repository.get(session=session, id=obj_in.role_id)
+            if not role:
+                raise HTTPException(status_code=404, detail="Assigned Role not found")
+
             # 1. Превращаем Pydantic-схему в словарь и исключаем открытый пароль
             create_data = obj_in.model_dump(exclude={"password"})
             
@@ -67,6 +79,18 @@ class EmployeeService:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
             
+            # Проверка Email при обновлении
+            if obj_in.email and obj_in.email != db_obj.email:
+                existing_email = session.exec(select(Employee).where(Employee.email == obj_in.email)).first()
+                if existing_email:
+                    raise HTTPException(status_code=400, detail="Email already registered")
+                    
+            # Проверка Role при обновлении
+            if obj_in.role_id and obj_in.role_id != db_obj.role_id:
+                role = role_repository.get(session=session, id=obj_in.role_id)
+                if not role:
+                    raise HTTPException(status_code=404, detail="Assigned Role not found")
+            
             # Превращаем данные для обновления в словарь (только те, что были переданы)
             update_data = obj_in.model_dump(exclude_unset=True)
             
@@ -76,7 +100,6 @@ class EmployeeService:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
             if not verify_password(obj_in.old_password, db_obj.hashed_password):
-                from fastapi import HTTPException
                 raise HTTPException(status_code=400, detail="Incorrect old password")
             db_obj.hashed_password = get_password_hash(obj_in.new_password)
             session.add(db_obj)
@@ -86,7 +109,6 @@ class EmployeeService:
             db_obj = self.get(session=session, id=id)
             employee_repository.delete(session=session, id=db_obj.id)
             return {"Success": "Employee deleted"}
-
 
 
 class RoleService:
