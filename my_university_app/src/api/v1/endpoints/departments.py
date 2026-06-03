@@ -1,7 +1,9 @@
 from typing import List, Annotated, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
-from src.api.deps import get_session, get_current_user, RequireRole
+
+# ИСПРАВЛЕНО: Меняем RequireRole на RequirePermission
+from src.api.deps import get_session, get_current_user, RequirePermission
 from src.services.departments import department_service, school_service, research_lab_service
 from src.models.department import (
     DepartmentRead, DepartmentCreate, DepartmentUpdate,
@@ -12,8 +14,10 @@ from src.models.school import SchoolRead, SchoolCreate, SchoolUpdate
 SessionDep = Annotated[Session, Depends(get_session)]
 CurrentUserDep = Annotated[dict, Depends(get_current_user)]
 
+# ==========================================
+# DEPARTMENTS ROUTER
+# ==========================================
 department_router = APIRouter(prefix="/departments", tags=["Departments"])
-
 
 @department_router.get("/", response_model=List[DepartmentRead])
 def get_departments(
@@ -26,29 +30,27 @@ def get_departments(
 ):
     return department_service.get_all(session=session, q=q, school_id=school_id, skip=skip, limit=limit)
 
-
 @department_router.get("/{department_id}", response_model=DepartmentRead)
 def get_department(department_id: int, session: SessionDep, current_user: CurrentUserDep):
     return department_service.get(session=session, id=department_id)
 
-
-@department_router.post("/", response_model=DepartmentRead, dependencies=[Depends(RequireRole(["Admin"]))])
+@department_router.post("/", response_model=DepartmentRead, dependencies=[Depends(RequirePermission(["departments:write"]))])
 def create_department(department: DepartmentCreate, session: SessionDep):
     return department_service.create(session=session, obj_in=department)
 
-
-@department_router.put("/{department_id}", response_model=DepartmentRead, dependencies=[Depends(RequireRole(["Admin"]))])
+@department_router.put("/{department_id}", response_model=DepartmentRead, dependencies=[Depends(RequirePermission(["departments:write"]))])
 def update_department(department_id: int, obj_in: DepartmentUpdate, session: SessionDep):
     return department_service.update(session=session, id=department_id, obj_in=obj_in)
 
-
-@department_router.delete("/{department_id}", dependencies=[Depends(RequireRole(["Admin"]))])
+@department_router.delete("/{department_id}", dependencies=[Depends(RequirePermission(["departments:delete"]))])
 def delete_department(department_id: int, session: SessionDep):
     return department_service.delete(session=session, id=department_id)
 
 
+# ==========================================
+# SCHOOLS ROUTER
+# ==========================================
 school_router = APIRouter(prefix="/schools", tags=["Schools"])
-
 
 @school_router.get("/", response_model=List[SchoolRead])
 def get_schools(
@@ -59,26 +61,26 @@ def get_schools(
 ):
     return school_service.get_all(session=session, skip=skip, limit=limit)
 
-
 @school_router.get("/{school_id}", response_model=SchoolRead)
 def get_school(school_id: int, session: SessionDep, current_user: CurrentUserDep):
     return school_service.get(session=session, id=school_id)
 
-
-@school_router.post("/", response_model=SchoolRead, dependencies=[Depends(RequireRole(["Admin"]))])
+@school_router.post("/", response_model=SchoolRead, dependencies=[Depends(RequirePermission(["schools:write"]))])
 def create_school(obj_in: SchoolCreate, session: SessionDep):
     return school_service.create(session=session, obj_in=obj_in)
 
-
-@school_router.put("/{school_id}", response_model=SchoolRead, dependencies=[Depends(RequireRole(["Admin"]))])
+@school_router.put("/{school_id}", response_model=SchoolRead, dependencies=[Depends(RequirePermission(["schools:write"]))])
 def update_school(school_id: int, obj_in: SchoolUpdate, session: SessionDep):
     return school_service.update(session=session, id=school_id, obj_in=obj_in)
 
-
-@school_router.delete("/{school_id}", dependencies=[Depends(RequireRole(["Admin"]))])
+@school_router.delete("/{school_id}", dependencies=[Depends(RequirePermission(["schools:delete"]))])
 def delete_school(school_id: int, session: SessionDep):
     return school_service.delete(session=session, id=school_id)
 
+
+# ==========================================
+# RESEARCH LABS ROUTER
+# ==========================================
 research_lab_router = APIRouter(prefix="/research-labs", tags=["Research Labs"])
 
 @research_lab_router.get("/", response_model=List[ResearchLabRead])
@@ -90,22 +92,18 @@ def get_research_labs(
 ):
     return research_lab_service.get_all(session=session, skip=skip, limit=limit)
 
-
 @research_lab_router.get("/{lab_id}", response_model=ResearchLabRead)
 def get_research_lab(lab_id: int, session: SessionDep, current_user: CurrentUserDep):
     return research_lab_service.get(session=session, id=lab_id)
 
-
-@research_lab_router.post("/", response_model=ResearchLabRead, dependencies=[Depends(RequireRole(["Admin"]))])
+@research_lab_router.post("/", response_model=ResearchLabRead, dependencies=[Depends(RequirePermission(["labs:write"]))])
 def create_research_lab(obj_in: ResearchLabCreate, session: SessionDep):
     return research_lab_service.create(session=session, obj_in=obj_in)
 
-
-@research_lab_router.put("/{lab_id}", response_model=ResearchLabRead, dependencies=[Depends(RequireRole(["Admin"]))])
+@research_lab_router.put("/{lab_id}", response_model=ResearchLabRead, dependencies=[Depends(RequirePermission(["labs:write"]))])
 def update_research_lab(lab_id: int, obj_in: ResearchLabUpdate, session: SessionDep):
     return research_lab_service.update(session=session, id=lab_id, obj_in=obj_in)
 
-
-@research_lab_router.delete("/{lab_id}", dependencies=[Depends(RequireRole(["Admin"]))])
+@research_lab_router.delete("/{lab_id}", dependencies=[Depends(RequirePermission(["labs:delete"]))])
 def delete_research_lab(lab_id: int, session: SessionDep):
     return research_lab_service.delete(session=session, id=lab_id)

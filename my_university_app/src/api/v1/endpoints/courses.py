@@ -2,7 +2,8 @@ from typing import List, Annotated, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
-from src.api.deps import get_session, get_current_user, RequireRole
+# ИСПРАВЛЕНО: Заменили RequireRole на RequirePermission
+from src.api.deps import get_session, get_current_user, RequirePermission
 from src.services.courses import course_catalog_service, course_offering_service, enrollment_service
 from src.models.course import (
     CourseCatalogRead, CourseCatalogCreate, CourseCatalogUpdate,
@@ -39,15 +40,18 @@ def get_course_catalog_entries(
 def get_course_catalog_entry(catalog_id: int, session: SessionDep, current_user: CurrentUserDep):
     return course_catalog_service.get(session=session, id=catalog_id)
 
-@course_catalog_router.post("/", response_model=CourseCatalogRead, dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право courses:write
+@course_catalog_router.post("/", response_model=CourseCatalogRead, dependencies=[Depends(RequirePermission(["courses:write"]))])
 def create_course_catalog_entry(obj_in: CourseCatalogCreate, session: SessionDep):
     return course_catalog_service.create(session=session, obj_in=obj_in)
 
-@course_catalog_router.put("/{catalog_id}", response_model=CourseCatalogRead, dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право courses:write
+@course_catalog_router.put("/{catalog_id}", response_model=CourseCatalogRead, dependencies=[Depends(RequirePermission(["courses:write"]))])
 def update_course_catalog_entry(catalog_id: int, obj_in: CourseCatalogUpdate, session: SessionDep):
     return course_catalog_service.update(session=session, id=catalog_id, obj_in=obj_in)
 
-@course_catalog_router.delete("/{catalog_id}", dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право courses:delete
+@course_catalog_router.delete("/{catalog_id}", dependencies=[Depends(RequirePermission(["courses:delete"]))])
 def delete_course_catalog_entry(catalog_id: int, session: SessionDep):
     return course_catalog_service.delete(session=session, id=catalog_id)
 
@@ -76,15 +80,18 @@ def get_course_offerings(
 def get_course_offering(offering_id: int, session: SessionDep, current_user: CurrentUserDep):
     return course_offering_service.get(session=session, id=offering_id)
 
-@course_offering_router.post("/", response_model=CourseOfferingRead, dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право offerings:write
+@course_offering_router.post("/", response_model=CourseOfferingRead, dependencies=[Depends(RequirePermission(["offerings:write"]))])
 def create_course_offering(obj_in: CourseOfferingCreate, session: SessionDep):
     return course_offering_service.create(session=session, obj_in=obj_in)
 
-@course_offering_router.put("/{offering_id}", response_model=CourseOfferingRead, dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право offerings:write
+@course_offering_router.put("/{offering_id}", response_model=CourseOfferingRead, dependencies=[Depends(RequirePermission(["offerings:write"]))])
 def update_course_offering(offering_id: int, obj_in: CourseOfferingUpdate, session: SessionDep):
     return course_offering_service.update(session=session, id=offering_id, obj_in=obj_in)
 
-@course_offering_router.delete("/{offering_id}", dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право offerings:delete
+@course_offering_router.delete("/{offering_id}", dependencies=[Depends(RequirePermission(["offerings:delete"]))])
 def delete_course_offering(offering_id: int, session: SessionDep):
     return course_offering_service.delete(session=session, id=offering_id)
 
@@ -112,7 +119,8 @@ def get_enrollments(
 def get_enrollment(student_id: int, offering_id: int, session: SessionDep, current_user: CurrentUserDep):
     return enrollment_service.get(session=session, student_id=student_id, offering_id=offering_id)
 
-@enrollment_router.post("/", response_model=EnrollmentRead, dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право enrollments:write
+@enrollment_router.post("/", response_model=EnrollmentRead, dependencies=[Depends(RequirePermission(["enrollments:write"]))])
 def create_enrollment(obj_in: EnrollmentCreate, session: SessionDep, current_user: CurrentUserDep):
     return enrollment_service.register_student(
         session=session, 
@@ -120,10 +128,12 @@ def create_enrollment(obj_in: EnrollmentCreate, session: SessionDep, current_use
         offering_id=obj_in.offering_id
     )
 
-@enrollment_router.put("/{student_id}/{offering_id}", response_model=EnrollmentRead, dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право enrollments:write
+@enrollment_router.put("/{student_id}/{offering_id}", response_model=EnrollmentRead, dependencies=[Depends(RequirePermission(["enrollments:write"]))])
 def update_enrollment(student_id: int, offering_id: int, obj_in: EnrollmentUpdate, session: SessionDep):
     return enrollment_service.update(session=session, student_id=student_id, offering_id=offering_id, obj_in=obj_in)
 
-@enrollment_router.delete("/{student_id}/{offering_id}", dependencies=[Depends(RequireRole(["Admin", "Faculty"]))])
+# ИСПРАВЛЕНО: Добавлено право enrollments:delete
+@enrollment_router.delete("/{student_id}/{offering_id}", dependencies=[Depends(RequirePermission(["enrollments:delete"]))])
 def delete_enrollment(student_id: int, offering_id: int, session: SessionDep):
     return enrollment_service.delete(session=session, student_id=student_id, offering_id=offering_id)
