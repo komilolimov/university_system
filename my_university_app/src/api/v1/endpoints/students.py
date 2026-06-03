@@ -1,10 +1,10 @@
 from typing import List, Optional, Annotated
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlmodel import Session
 from fastapi.security import HTTPAuthorizationCredentials
 
-# 1. ИСПРАВЛЕНИЕ: Берем сессию и безопасность из правильного места (deps.py)
-from src.api.deps import get_session, get_current_user, RequireRole
+# ИСПРАВЛЕНО: Заменили RequireRole на RequirePermission
+from src.api.deps import get_session, get_current_user, RequirePermission
 from src.services.students import student_service
 from src.models.student import StudentRead, StudentCreate, StudentUpdate
 from src.models.enums import RegionType
@@ -37,18 +37,18 @@ def get_students(
 def get_student(student_id: int, session: SessionDep, current_user: CurrentUserDep):
     return student_service.get(session=session, id=student_id)
 
-
-@router.post("/", response_model=StudentRead, dependencies=[Depends(RequireRole(["Admin"]))])
+# ИСПРАВЛЕНО: Добавлено право students:write
+@router.post("/", response_model=StudentRead, dependencies=[Depends(RequirePermission(["students:write"]))])
 def create_student(student_in: StudentCreate, session: SessionDep):
     return student_service.create(session=session, obj_in=student_in)
 
-
-@router.put("/{student_id}", response_model=StudentRead, dependencies=[Depends(RequireRole(["Admin"]))])
+# ИСПРАВЛЕНО: Добавлено право students:write
+@router.put("/{student_id}", response_model=StudentRead, dependencies=[Depends(RequirePermission(["students:write"]))])
 def update_student(student_id: int, student_in: StudentUpdate, session: SessionDep):
     return student_service.update(session=session, id=student_id, obj_in=student_in)
 
-
-@router.delete("/{student_id}", dependencies=[Depends(RequireRole(["Admin"]))])
+# ИСПРАВЛЕНО: Добавлено право students:delete
+@router.delete("/{student_id}", dependencies=[Depends(RequirePermission(["students:delete"]))])
 def delete_student(student_id: int, session: SessionDep):
     return student_service.delete(session=session, id=student_id)
 
@@ -60,7 +60,6 @@ def change_student_password(
     obj_in: ChangePasswordRequest
 ):
     if current_user.get("user_type") != "student":
-        from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="Only students can change their student password")
     
     student_id = int(current_user["user_id"])
