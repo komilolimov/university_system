@@ -37,28 +37,40 @@ def get_me(
 ):
     user_id = int(current_user["user_id"])
     user_type = current_user["user_type"]
-    role = current_user.get("role")
-    
-    # Безопасная проверка регистра, как в /permissions
-    role_lower = role.lower() if role else ""
-    is_admin = role_lower in ["admin", "administrator"]
-    
+
     if user_type == "student":
         user = session.get(Student, user_id)
+
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
         user_dict = user.model_dump()
         user_dict["permissions"] = []
+
         return StudentRead(**user_dict)
-    else:
-        user = session.get(Employee, user_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-            
-        user_dict = user.model_dump()
-        user_dict["permissions"] = ["*"] if is_admin else []
-        return EmployeeRead(**user_dict)
+
+    user = session.get(Employee, user_id)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    permissions = []
+
+    if user.role_id:
+        db_role = session.get(Role, user.role_id)
+
+        if db_role:
+            role_name = db_role.title.lower()
+
+            if role_name in ["admin", "administrator"]:
+                permissions = ["*"]
+            elif db_role.permissions:
+                permissions = [permission.name for permission in db_role.permissions]
+
+    user_dict = user.model_dump()
+    user_dict["permissions"] = permissions
+
+    return EmployeeRead(**user_dict)
 
 
 @router.get("/permissions")
