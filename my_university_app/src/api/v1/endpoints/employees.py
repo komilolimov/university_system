@@ -4,11 +4,12 @@ from sqlmodel import Session
 
 # ИСПРАВЛЕНО: Заменили RequireRole на RequirePermission
 from src.api.deps import get_session, get_current_user, RequirePermission
-from src.services.employees import employee_service, role_service, employee_experience_service
+
+# ИСПРАВЛЕНО: Оставили только сервисы, относящиеся к сотрудникам
+from src.services.employees import employee_service, employee_experience_service
 from src.models.employee import (
     EmployeeRead, EmployeeCreate, EmployeeUpdate,
     Employee,
-    RoleRead, RoleCreate, RoleUpdate,
     EmployeeExperienceRead, EmployeeExperienceCreate, EmployeeExperienceUpdate,
 )
 from src.models.auth import ChangePasswordRequest
@@ -64,17 +65,19 @@ def update_employee(employee_id: int, obj_in: EmployeeUpdate, session: SessionDe
     employee = employee_service.update(session=session, id=employee_id, obj_in=obj_in)
     return format_employee_read(employee)
 
-# ИСПРАВЛЕНО: Добавлено право employees:delete
+# --- ДОБАВЛЕНО: Метод DELETE для удаления сотрудника ---
 @employee_router.delete("/{employee_id}", dependencies=[Depends(RequirePermission(["employees:delete"]))])
 def delete_employee(employee_id: int, session: SessionDep):
     return employee_service.delete(session=session, id=employee_id)
 
+# --- ДОБАВЛЕНО: Метод для смены пароля сотрудника ---
 @employee_router.post("/change-password")
 def change_employee_password(
     session: SessionDep,
     current_user: CurrentUserDep,
     obj_in: ChangePasswordRequest
 ):
+    # Проверяем, что запрос делает именно сотрудник
     if current_user.get("user_type") != "employee":
         raise HTTPException(status_code=403, detail="Only employees can change their employee password")
     
@@ -84,34 +87,18 @@ def change_employee_password(
 
 
 # ==========================================
-# EMPLOYEE EXPERIENCES ROUTER
+# EMPLOYEE EXPERIENCE ROUTER
 # ==========================================
 experience_router = APIRouter(prefix="/employee-experiences", tags=["Employee Experiences"])
 
-@experience_router.get("/", response_model=List[EmployeeExperienceRead])
-def get_experiences(
-    session: SessionDep, 
-    current_user: CurrentUserDep, 
-    skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
-):
-    return employee_experience_service.get_all(session=session, skip=skip, limit=limit)
+@experience_router.post("/{employee_id}", response_model=EmployeeExperienceRead, dependencies=[Depends(RequirePermission(["employees:write"]))])
+def create_experience(employee_id: int, obj_in: EmployeeExperienceCreate, session: SessionDep):
+    return employee_experience_service.create(session=session, employee_id=employee_id, obj_in=obj_in)
 
-@experience_router.get("/{experience_id}", response_model=EmployeeExperienceRead)
-def get_experience(experience_id: int, session: SessionDep, current_user: CurrentUserDep):
-    return employee_experience_service.get(session=session, id=experience_id)
-
-# ИСПРАВЛЕНО: Добавлено право experiences:write
-@experience_router.post("/", response_model=EmployeeExperienceRead, dependencies=[Depends(RequirePermission(["experiences:write"]))])
-def create_experience(obj_in: EmployeeExperienceCreate, session: SessionDep):
-    return employee_experience_service.create(session=session, obj_in=obj_in)
-
-# ИСПРАВЛЕНО: Добавлено право experiences:write
-@experience_router.put("/{experience_id}", response_model=EmployeeExperienceRead, dependencies=[Depends(RequirePermission(["experiences:write"]))])
+@experience_router.put("/{experience_id}", response_model=EmployeeExperienceRead, dependencies=[Depends(RequirePermission(["employees:write"]))])
 def update_experience(experience_id: int, obj_in: EmployeeExperienceUpdate, session: SessionDep):
     return employee_experience_service.update(session=session, id=experience_id, obj_in=obj_in)
 
-# ИСПРАВЛЕНО: Добавлено право experiences:delete
-@experience_router.delete("/{experience_id}", dependencies=[Depends(RequirePermission(["experiences:delete"]))])
+@experience_router.delete("/{experience_id}", dependencies=[Depends(RequirePermission(["employees:write"]))])
 def delete_experience(experience_id: int, session: SessionDep):
     return employee_experience_service.delete(session=session, id=experience_id)
