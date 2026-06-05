@@ -118,16 +118,39 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
     return;
   }
 
-    updateEmployee(id, { is_active: true })
-      .then(() => {
-        toast.success("Employee activated");
-        fetchEmployees();
-      })
-      .catch((err: unknown) => {
-        if (err instanceof Error) {
-          toast.error("Failed to activate employee", err.message);
-        }
+  startTransition(async () => {
+    const toastId = toast.loading(
+      "Activating employee...",
+      "Please wait."
+    );
+
+    try {
+      await updateEmployee(id, {
+        first_name: employee.first_name,
+        last_name: employee.last_name,
+        email: employee.email,
+        role_id: employee.role_id,
+        department_id: employee.department_id,
+        is_active: true,
       });
+
+      fetchEmployees();
+
+      toast.dismiss(toastId);
+      toast.success(
+        "Employee activated",
+        "Employee is now active."
+      );
+    } catch (err: unknown) {
+      toast.dismiss(toastId);
+
+      if (err instanceof Error) {
+        toast.error("Failed to activate employee", err.message);
+      } else {
+        toast.error("Error", "Unexpected error occurred.");
+      }
+    }
+  });
 };
 
   // AG Grid Columns
@@ -254,7 +277,12 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
         <DataGrid
           rowData={employees}
           columnDefs={columnDefs}
-          context={gridContext}
+          context={{
+            canMutate,
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onActivate: handleActivate
+          }}
           height={600}
         />
       </div>
