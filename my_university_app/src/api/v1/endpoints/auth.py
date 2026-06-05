@@ -7,7 +7,8 @@ from fastapi.security import HTTPAuthorizationCredentials
 from src.api.deps import get_session, get_current_user, security
 from src.services.auth import AuthService
 from src.models.student import Student, StudentRead
-from src.models.employee import Employee, EmployeeRead, Role
+from src.models.employee import Employee, EmployeeRead
+from src.models.roles import Role
 
 router = APIRouter()
 

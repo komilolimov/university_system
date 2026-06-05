@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 # ИСПРАВЛЕНО: Заменили RequireRole на RequirePermission
 from src.api.deps import get_session, RequirePermission
-from src.models.employee import (
+from src.models.permission import (
     PermissionCreate, 
     PermissionRead, 
     PermissionUpdate, 
