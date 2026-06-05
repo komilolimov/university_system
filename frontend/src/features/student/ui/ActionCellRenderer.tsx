@@ -4,37 +4,45 @@ import React, { useTransition } from "react";
 import type { CustomCellRendererProps } from "ag-grid-react";
 import { type Student } from "@/entities/student";
 
-export const ActionCellRenderer = (props: CustomCellRendererProps<Student>) => {
+export interface ActionCellContext<T> {
+  canMutate?: boolean;
+  onEdit: (data: T) => void;
+  onDelete: (id: number) => void;
+  onActivate: (id: number) => void;
+}
+
+export const ActionCellRenderer = (
+  props: CustomCellRendererProps<Student> & { context: ActionCellContext<Student> }
+) => {
   const student = props.data;
-  const { onEdit, onDelete } = props.context || {};
+  const { onEdit, onDelete, onActivate, canMutate } = props.context || {};
   const [isPending, startTransition] = useTransition();
 
-  if (!student) return null;
+  if (!student || (canMutate !== undefined && !canMutate)) return null;
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onEdit) {
-      onEdit(student);
-    }
+    onEdit?.(student);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
+
     if (!onDelete) return;
-    
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${student.first_name} ${student.last_name}? This action cannot be undone.`
-    );
-    
-    if (confirmDelete) {
-      startTransition(async () => {
-        try {
-          await onDelete(student.id);
-        } catch (err: any) {
-          alert(err.message || "Failed to delete student profile.");
-        }
-      });
-    }
+
+    startTransition(() => {
+      onDelete(student.id);
+    });
+  };
+
+  const handleActivate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (!onActivate) return;
+
+    startTransition(() => {
+      onActivate(student.id);
+    });
   };
 
   return (
@@ -45,13 +53,24 @@ export const ActionCellRenderer = (props: CustomCellRendererProps<Student>) => {
       >
         Edit
       </button>
-      <button
-        onClick={handleDelete}
-        disabled={isPending}
-        className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-red-600 hover:text-red-700 hover:bg-red-50/50 hover:border-red-100 active:bg-red-100 transition-colors cursor-pointer select-none disabled:opacity-50"
-      >
-        {isPending ? "..." : "Delete"}
-      </button>
+
+      {student.is_active ? (
+        <button
+          onClick={handleDelete}
+          disabled={isPending}
+          className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-red-600 hover:text-red-700 hover:bg-red-50/50 hover:border-red-100 active:bg-red-100 transition-colors cursor-pointer select-none disabled:opacity-50"
+        >
+          {isPending ? "..." : "Archive"}
+        </button>
+      ) : (
+        <button
+          onClick={handleActivate}
+          disabled={isPending}
+          className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50/50 hover:border-emerald-100 active:bg-emerald-100 transition-colors cursor-pointer select-none disabled:opacity-50"
+        >
+          {isPending ? "..." : "Activate"}
+        </button>
+      )}
     </div>
   );
 };

@@ -2,7 +2,7 @@
 
 import React, { useTransition } from "react";
 import type { ICellRendererParams } from "ag-grid-community";
-import type { Employee } from "@/entities/employee";
+import type { Role } from "@/entities/role";
 
 export interface ActionCellContext<T> {
   canMutate?: boolean;
@@ -12,31 +12,32 @@ export interface ActionCellContext<T> {
 }
 
 export const ActionCellRenderer = (
-  params: ICellRendererParams<Employee> & { context: ActionCellContext<Employee> }
+  params: ICellRendererParams<Role> & { context: ActionCellContext<Role> }
 ) => {
-  const { data, context } = params;
   const [isPending, startTransition] = useTransition();
 
-  if (!data || (context.canMutate !== undefined && !context.canMutate)) return null;
+  if (!params.data) return null;
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    context.onEdit(data);
+    params.context.onEdit(params.data);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-
+    const roleId = params.data?.id;
+    if (!roleId) return;
     startTransition(() => {
-      context.onDelete(data.id);
+      params.context.onDelete(roleId);
     });
   };
 
   const handleActivate = (e: React.MouseEvent) => {
     e.stopPropagation();
-
+    const roleId = params.data?.id;
+    if (!roleId) return;
     startTransition(() => {
-      context.onActivate(data.id);
+      params.context.onActivate(roleId);
     });
   };
 
@@ -49,7 +50,8 @@ export const ActionCellRenderer = (
         Edit
       </button>
 
-      {data.is_active ? (
+      {params.data.is_active ? (
+        // Кнопка Archive (если активен)
         <button
           onClick={handleDelete}
           disabled={isPending}
@@ -58,6 +60,7 @@ export const ActionCellRenderer = (
           {isPending ? "..." : "Archive"}
         </button>
       ) : (
+        // Кнопка Activate (если не активен)
         <button
           onClick={handleActivate}
           disabled={isPending}
