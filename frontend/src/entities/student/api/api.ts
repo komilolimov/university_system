@@ -1,6 +1,8 @@
 "use server";
 
 import { apiClient } from "@/shared/api/client";
+import { getErrorMessage } from "@/shared/api/error";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import type { StudentCreate, StudentUpdate, RegionType } from "../model/types";
 
 export interface GetStudentsParams {
@@ -11,15 +13,6 @@ export interface GetStudentsParams {
   skip?: number;
   limit?: number;
 }
-
-const getErrorMessage = (error: any): string => {
-  if (!error) return "Unknown error occurred";
-  if (typeof error.detail === "string") return error.detail;
-  if (Array.isArray(error.detail)) {
-    return error.detail.map((err: any) => `${err.loc.slice(1).join(" -> ")}: ${err.msg}`).join("; ");
-  }
-  return error.message || JSON.stringify(error);
-};
 
 export const getStudents = async (params: GetStudentsParams = {}) => {
   const query: Record<string, string | number | boolean> = {};
@@ -43,9 +36,10 @@ export const getStudents = async (params: GetStudentsParams = {}) => {
       throw new Error(getErrorMessage(error));
     }
     return data || [];
-  } catch (err) {
+  } catch (err: unknown) {
+    if (isRedirectError(err)) throw err;
     console.error("[getStudents] Unexpected error on /api/v1/students/:", err);
-    throw err;
+    throw new Error(getErrorMessage(err));
   }
 };
 
@@ -60,9 +54,10 @@ export const createStudent = async (data: StudentCreate) => {
       throw new Error(getErrorMessage(error));
     }
     return responseData;
-  } catch (err) {
+  } catch (err: unknown) {
+    if (isRedirectError(err)) throw err;
     console.error("[createStudent] Unexpected error on /api/v1/students/:", err);
-    throw err;
+    throw new Error(getErrorMessage(err));
   }
 };
 
@@ -80,9 +75,10 @@ export const updateStudent = async (studentId: number, data: StudentUpdate) => {
       throw new Error(getErrorMessage(error));
     }
     return responseData;
-  } catch (err) {
+  } catch (err: unknown) {
+    if (isRedirectError(err)) throw err;
     console.error(`[updateStudent] Unexpected error on /api/v1/students/${studentId}:`, err);
-    throw err;
+    throw new Error(getErrorMessage(err));
   }
 };
 
@@ -99,9 +95,10 @@ export const deleteStudent = async (studentId: number) => {
       throw new Error(getErrorMessage(error));
     }
     return data;
-  } catch (err) {
+  } catch (err: unknown) {
+    if (isRedirectError(err)) throw err;
     console.error(`[deleteStudent] Unexpected error on /api/v1/students/${studentId}:`, err);
-    throw err;
+    throw new Error(getErrorMessage(err));
   }
 };
 
@@ -113,7 +110,7 @@ export const getAdvisors = async () => {
       return [];
     }
     return data || [];
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("[getAdvisors] Unexpected error on /api/v1/employees/:", err);
     return [];
   }
