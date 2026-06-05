@@ -8,7 +8,6 @@ from src.repositories.employees import employee_repository, employee_experience_
 from src.repositories.rbac import role_repository
 from src.models.employee import (
     Employee, EmployeeCreate, EmployeeUpdate,
-    Role, RoleCreate, RoleUpdate,
     EmployeeExperience, EmployeeExperienceCreate, EmployeeExperienceUpdate,
 )
 from src.core.security import get_password_hash, verify_password
@@ -107,34 +106,12 @@ class EmployeeService:
     def delete(self, session: Session, id: int) -> dict:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
-            employee_repository.delete(session=session, id=db_obj.id)
-            return {"Success": "Employee deleted"}
-
-
-class RoleService:
-    def get_all(self, session: Session, skip: int = 0, limit: int = 100) -> List[Role]:
-        return role_repository.get_all(session=session, skip=skip, limit=limit)
-
-    def get(self, session: Session, id: int) -> Role:
-        obj = role_repository.get(session=session, id=id)
-        if not obj:
-            raise EntityNotFoundError("Role", id)
-        return obj
-
-    def create(self, session: Session, obj_in: RoleCreate) -> Role:
-        with UnitOfWork(session):
-            return role_repository.create(session=session, obj_in=obj_in)
-
-    def update(self, session: Session, id: int, obj_in: RoleUpdate) -> Role:
-        with UnitOfWork(session):
-            db_obj = self.get(session=session, id=id)
-            return role_repository.update(session=session, db_obj=db_obj, obj_in=obj_in)
-
-    def delete(self, session: Session, id: int) -> dict:
-        with UnitOfWork(session):
-            db_obj = self.get(session=session, id=id)
-            role_repository.delete(session=session, id=db_obj.id)
-            return {"Success": "Role deleted"}
+            
+            # Мягкое удаление (Архивирование)
+            db_obj.is_active = False
+            session.add(db_obj)
+            
+            return {"Success": "Employee archived successfully"}
 
 
 class EmployeeExperienceService:
@@ -147,22 +124,33 @@ class EmployeeExperienceService:
             raise EntityNotFoundError("EmployeeExperience", id)
         return obj
 
-    def create(self, session: Session, obj_in: EmployeeExperienceCreate) -> EmployeeExperience:
+    # ИСПРАВЛЕНО: Добавлен аргумент employee_id для связки с роутером
+    def create(self, session: Session, employee_id: int, obj_in: EmployeeExperienceCreate) -> EmployeeExperience:
         with UnitOfWork(session):
-            return employee_experience_repository.create(session=session, obj_in=obj_in)
+            # Проверяем, существует ли такой сотрудник, прежде чем добавлять ему опыт
+            employee = employee_repository.get(session=session, id=employee_id)
+            if not employee:
+                raise EntityNotFoundError("Employee", employee_id)
+            
+            # Подмешиваем employee_id в данные перед созданием записи
+            create_data = obj_in.model_dump()
+            create_data["employee_id"] = employee_id
+            
+            return employee_experience_repository.create(session=session, obj_in=create_data)
 
     def update(self, session: Session, id: int, obj_in: EmployeeExperienceUpdate) -> EmployeeExperience:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
-            return employee_experience_repository.update(session=session, db_obj=db_obj, obj_in=obj_in)
+            # Извлекаем только те поля, которые были переданы (PATCH поведение)
+            update_data = obj_in.model_dump(exclude_unset=True)
+            return employee_experience_repository.update(session=session, db_obj=db_obj, obj_in=update_data)
 
     def delete(self, session: Session, id: int) -> dict:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
+            # Жесткое удаление опыта работы из базы
             employee_experience_repository.delete(session=session, id=db_obj.id)
             return {"Success": "Employee experience deleted"}
 
-
 employee_service = EmployeeService()
-role_service = RoleService()
 employee_experience_service = EmployeeExperienceService()

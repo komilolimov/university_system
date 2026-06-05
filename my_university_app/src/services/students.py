@@ -15,7 +15,7 @@ class StudentService:
         q: Optional[str] = None,
         region: Optional[RegionType] = None,
         advisor_id: Optional[int] = None,
-        is_active: Optional[bool] = None,
+        is_active: Optional[bool] = True,
         skip: int = 0, 
         limit: int = 100
     ) -> List[Student]:
@@ -68,7 +68,10 @@ class StudentService:
     def delete(self, session: Session, id: int) -> dict:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
-            student_repository.delete(session=session, id=db_obj.id)
-            return {"Success": "Student deleted"}
+            
+            db_obj.is_active = False
+            session.add(db_obj)
+            
+            return {"Success": "Student archived successfully"}
 
 student_service = StudentService()
