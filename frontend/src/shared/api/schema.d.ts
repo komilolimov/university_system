@@ -4,6 +4,94 @@
  */
 
 export interface paths {
+    "/api/v1/permissions/": {
+        get: {
+            responses: {
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["Permission"][];
+                    };
+                };
+            };
+        };
+        post: {
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PermissionCreate"];
+                };
+            };
+            responses: {
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["Permission"];
+                    };
+                };
+            };
+        };
+    };
+    "/api/v1/permissions/{permission_id}": {
+        put: {
+            parameters: {
+                path: {
+                    permission_id: number;
+                };
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["PermissionUpdate"];
+                };
+            };
+            responses: {
+                200: {
+                    content: {
+                        "application/json": components["schemas"]["Permission"];
+                    };
+                };
+            };
+        };
+        delete: {
+            parameters: {
+                path: {
+                    permission_id: number;
+                };
+            };
+            responses: {
+                204: {
+                    content: never;
+                };
+            };
+        };
+    };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            responses: {
+                200: {
+                    content: {
+                        "application/json": Record<string, unknown>;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
