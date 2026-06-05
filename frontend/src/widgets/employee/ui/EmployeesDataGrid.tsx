@@ -118,31 +118,29 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
     return;
   }
 
-  startTransition(async () => {
+  startTransition(() => {
     const toastId = toast.loading(
       "Activating employee...",
       "Please wait."
     );
 
-    try {
-      await updateEmployee(id, { is_active: true });
-
-      fetchEmployees();
-
-      toast.dismiss(toastId);
-      toast.success(
-        "Employee activated",
-        "Employee is now active."
-      );
-    } catch (err: unknown) {
-      toast.dismiss(toastId);
-
-      if (err instanceof Error) {
-        toast.error("Failed to activate employee", err.message);
-      } else {
-        toast.error("Error", "Unexpected error occurred.");
-      }
-    }
+    updateEmployee(id, { is_active: true })
+      .then(() => {
+        fetchEmployees();
+        toast.dismiss(toastId);
+        toast.success(
+          "Employee activated",
+          "Employee is now active."
+        );
+      })
+      .catch((err: unknown) => {
+        toast.dismiss(toastId);
+        if (err instanceof Error) {
+          toast.error("Failed to activate employee", err.message);
+        } else {
+          toast.error("Error", "Unexpected error occurred.");
+        }
+      });
   });
 };
 
