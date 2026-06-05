@@ -47,8 +47,8 @@ class StudentUpdate(SQLModel):
 class StudentProgramBase(SQLModel):
     type: ProgramType
     declared_date: date
-    student_id: int = Field(foreign_key="students.id", primary_key=True)
-    program_id: int = Field(foreign_key="degree_programs.id", primary_key=True)
+    student_id: int = Field(foreign_key="students.id", ondelete="CASCADE", primary_key=True)
+    program_id: int = Field(foreign_key="degree_programs.id", ondelete="CASCADE", primary_key=True)
 
 class StudentProgram(StudentProgramBase, TimestampMixin, table=True):
     __tablename__ = "student_programs"

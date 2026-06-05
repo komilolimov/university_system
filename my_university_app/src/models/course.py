@@ -1,3 +1,4 @@
+# cspell:ignore ondelete
 from typing import Optional
 from datetime import date
 from decimal import Decimal
@@ -87,8 +88,8 @@ class EnrollmentBase(SQLModel):
         decimal_places=2
     )
     credits_earned: Optional[int] = None
-    student_id: int = Field(foreign_key="students.id", primary_key=True)
-    offering_id: int = Field(foreign_key="course_offerings.id", primary_key=True)
+    student_id: int = Field(foreign_key="students.id",ondelete="CASCADE", primary_key=True)
+    offering_id: int = Field(foreign_key="course_offerings.id", ondelete="CASCADE", primary_key=True)
 
 class Enrollment(EnrollmentBase, TimestampMixin, table=True):
     __tablename__ = "enrollments"

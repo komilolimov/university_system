@@ -4,65 +4,14 @@ from sqlmodel import SQLModel, Field, Relationship
 from src.models.base import TimestampMixin
 from src.models.enums import RegionType
 
+# Используем TYPE_CHECKING, чтобы избежать циклических импортов
 if TYPE_CHECKING:
     from src.models.student import Student
+    from src.models.roles import Role  # Предполагается, что роли будут здесь
 
-class RolePermissionLink(SQLModel, table=True):
-    __tablename__ = "role_permissions"
-    role_id: Optional[int] = Field(default=None, foreign_key="roles.id", primary_key=True)
-    permission_id: Optional[int] = Field(default=None, foreign_key="permissions.id", primary_key=True)
-
-class PermissionBase(SQLModel):
-    name: str = Field(unique=True, index=True)
-    description: Optional[str] = None
-    is_active: bool = Field(default=True) # <-- Новое поле (по умолчанию активно)
-
-# Добавляем возможность менять этот флаг через PUT/PATCH запросы
-class PermissionUpdate(SQLModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    is_active: Optional[bool] = None # <-- Чтобы админ мог "выключать" права
-
-class Permission(PermissionBase, TimestampMixin, table=True):
-    __tablename__ = "permissions"
-    id: Optional[int] = Field(default=None, primary_key=True)
-    
-    roles: list["Role"] = Relationship(back_populates="permissions", link_model=RolePermissionLink)
-
-class PermissionCreate(PermissionBase):
-    pass
-
-class PermissionRead(PermissionBase):
-    id: int
-
-class AssignPermissionRequest(SQLModel):
-    role_id: int
-    permission_id: int
-
-class RoleBase(SQLModel):
-    title: str = Field(unique=True)
-    is_faculty: bool = Field(default=False)
-
-class Role(RoleBase, TimestampMixin, table=True):
-    __tablename__ = "roles"
-    id: Optional[int] = Field(default=None, primary_key=True)
-    
-    permissions: list["Permission"] = Relationship(back_populates="roles", link_model=RolePermissionLink)
-
-class RoleCreate(RoleBase):
-    pass
-
-class RoleRead(RoleBase):
-    id: int
-
-class RoleReadWithPermissions(RoleBase):
-    id: int
-    permissions: list[PermissionRead] = []
-
-class RoleUpdate(SQLModel):
-    title: Optional[str] = None
-    is_faculty: Optional[bool] = None
-
+# ==========================================
+# EMPLOYEES
+# ==========================================
 class EmployeeBase(SQLModel):
     first_name: str
     last_name: str
@@ -78,14 +27,14 @@ class Employee(EmployeeBase, TimestampMixin, table=True):
     __tablename__ = "employees"
     id: Optional[int] = Field(default=None, primary_key=True)
     
-    # --- ДОБАВЛЕНО: Хэш пароля для сохранения в базе данных ---
+    # Хэш пароля для сохранения в базе данных
     hashed_password: str 
     
     advisees: list["Student"] = Relationship(back_populates="advisor")
     role: Optional["Role"] = Relationship()
 
 class EmployeeCreate(EmployeeBase):
-    # --- ДОБАВЛЕНО: Открытый пароль, который мы получаем при создании сотрудника ---
+    # Открытый пароль, который мы получаем при создании сотрудника
     password: str 
 
 class EmployeeRead(EmployeeBase):
@@ -103,6 +52,9 @@ class EmployeeUpdate(SQLModel):
     hire_date: Optional[date] = None
     is_active: Optional[bool] = None
 
+# ==========================================
+# EMPLOYEE EXPERIENCE
+# ==========================================
 class EmployeeExperienceBase(SQLModel):
     company_name: str
     job_title: str
