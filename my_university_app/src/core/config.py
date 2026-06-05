@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     
     PRIVATE_KEY_PATH: str = "certs/private.pem"
     PUBLIC_KEY_PATH: str = "certs/public.pem"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 720
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     ALGORITHM: str = "RS256"
     CORS_ORIGINS: list[str] = ["http://localhost:3000"]

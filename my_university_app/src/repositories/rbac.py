@@ -1,6 +1,7 @@
 
 from src.repositories.base import BaseRepository
-from src.models.employee import Role, Permission, RolePermissionLink
+from src.models.roles import Role
+from src.models.permission import Permission, RolePermissionLink
 
 class RoleRepository(BaseRepository[Role]):
     def __init__(self):
