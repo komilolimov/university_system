@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search, ChevronDown, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import type { Employee, RegionType } from "@/entities/student";
 
 export interface StudentFiltersToolbarProps {
@@ -16,7 +16,9 @@ export interface StudentFiltersToolbarProps {
   advisors: Employee[];
 }
 
-export const StudentFiltersToolbar: React.FC<StudentFiltersToolbarProps> = ({
+export const StudentFiltersToolbar: React.FC<
+  StudentFiltersToolbarProps
+> = ({
   searchQuery,
   onSearchChange,
   selectedRegion,
@@ -27,9 +29,11 @@ export const StudentFiltersToolbar: React.FC<StudentFiltersToolbarProps> = ({
   onStatusChange,
   advisors,
 }) => {
-  const hasActiveFilters = Boolean(
-    searchQuery || selectedRegion || selectedAdvisor || selectedStatus !== "all"
-  );
+  const hasActiveFilters =
+    Boolean(searchQuery) ||
+    Boolean(selectedRegion) ||
+    Boolean(selectedAdvisor) ||
+    selectedStatus !== "all";
 
   const clearFilters = () => {
     onSearchChange("");
@@ -39,25 +43,30 @@ export const StudentFiltersToolbar: React.FC<StudentFiltersToolbarProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 select-none">
-      {/* Search Input */}
-      <div className="relative w-full sm:w-auto">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+    <div className="flex flex-col md:flex-row md:items-center gap-3 w-full bg-white p-3 rounded-lg border border-neutral-200 shadow-sm select-none">
+      {/* Search */}
+      <div className="relative flex-1">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 text-neutral-400" />
+        </div>
+
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search students..."
-          className="w-full sm:w-64 h-9 pl-9 pr-3 text-sm font-medium bg-white text-neutral-900 border border-neutral-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 transition-shadow placeholder:text-neutral-400 placeholder:font-normal"
+          className="block w-full pl-9 pr-3 py-1.5 text-sm font-medium border border-neutral-200 rounded-md bg-neutral-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-colors text-black placeholder:text-neutral-500"
         />
       </div>
 
-      {/* Region Select */}
-      <div className="relative w-full sm:w-auto min-w-[130px]">
+      {/* Region */}
+      <div className="w-full md:w-44">
         <select
           value={selectedRegion}
-          onChange={(e) => onRegionChange(e.target.value as RegionType | "")}
-          className="w-full h-9 pl-3 pr-8 text-sm font-medium bg-white text-neutral-900 border border-neutral-200 rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 cursor-pointer"
+          onChange={(e) =>
+            onRegionChange(e.target.value as RegionType | "")
+          }
+          className="block w-full px-3 py-1.5 text-sm font-medium border border-neutral-200 rounded-md bg-neutral-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-colors cursor-pointer appearance-none text-black"
         >
           <option value="">All Regions</option>
           <option value="Domestic">Domestic</option>
@@ -65,47 +74,49 @@ export const StudentFiltersToolbar: React.FC<StudentFiltersToolbarProps> = ({
           <option value="Non-EU">Non-EU</option>
           <option value="USA">USA</option>
         </select>
-        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
       </div>
 
-      {/* Advisor Select */}
-      <div className="relative w-full sm:w-auto min-w-[160px]">
+      {/* Advisor */}
+      <div className="w-full md:w-56">
         <select
           value={selectedAdvisor}
           onChange={(e) => onAdvisorChange(e.target.value)}
-          className="w-full h-9 pl-3 pr-8 text-sm font-medium bg-white text-neutral-900 border border-neutral-200 rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 cursor-pointer"
+          className="block w-full px-3 py-1.5 text-sm font-medium border border-neutral-200 rounded-md bg-neutral-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-colors cursor-pointer appearance-none text-black"
         >
           <option value="">All Advisors</option>
-          {advisors.map((emp) => (
-            <option key={emp.id} value={emp.id}>
-              {emp.first_name} {emp.last_name}
+
+          {advisors.map((advisor) => (
+            <option key={advisor.id} value={advisor.id}>
+              {advisor.first_name} {advisor.last_name}
             </option>
           ))}
         </select>
-        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
       </div>
 
-      {/* Status Select */}
-      <div className="relative w-full sm:w-auto min-w-[140px]">
-        <select
-          value={selectedStatus}
-          onChange={(e) => onStatusChange(e.target.value as "all" | "active" | "inactive")}
-          className="w-full h-9 pl-3 pr-8 text-sm font-medium bg-white text-neutral-900 border border-neutral-200 rounded-md appearance-none focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900 cursor-pointer"
-        >
-          <option value="all">All Statuses</option>
-          <option value="active">Active Only</option>
-          <option value="inactive">Inactive Only</option>
-        </select>
-        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+      {/* Status */}
+      <div className="flex bg-neutral-100 p-0.5 rounded-md border border-neutral-200">
+        {(["all", "active", "inactive"] as const).map((status) => (
+          <button
+            key={status}
+            onClick={() => onStatusChange(status)}
+            className={`px-3 py-1 text-xs font-semibold rounded-sm capitalize transition-colors ${
+              selectedStatus === status
+                ? "bg-white text-black shadow-sm"
+                : "text-neutral-500 hover:text-neutral-700"
+            }`}
+          >
+            {status}
+          </button>
+        ))}
       </div>
 
-      {/* Clear Filters Button */}
+      {/* Clear */}
       {hasActiveFilters && (
         <button
           onClick={clearFilters}
-          className="inline-flex items-center justify-center h-9 px-3 text-sm font-medium text-neutral-600 bg-neutral-100 border border-transparent hover:bg-neutral-200 hover:text-neutral-900 rounded-md transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border border-neutral-200 bg-neutral-50 text-neutral-600 hover:bg-white hover:text-black transition-colors"
         >
-          <X className="w-4 h-4 mr-1.5" />
+          <X className="h-4 w-4" />
           Clear
         </button>
       )}

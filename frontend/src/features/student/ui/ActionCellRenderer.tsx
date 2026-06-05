@@ -4,21 +4,14 @@ import React, { useTransition } from "react";
 import type { CustomCellRendererProps } from "ag-grid-react";
 import { type Student } from "@/entities/student";
 
-export interface ActionCellContext<T> {
-  canMutate?: boolean;
-  onEdit: (data: T) => void;
-  onDelete: (id: number) => void;
-  onActivate: (id: number) => void;
-}
-
 export const ActionCellRenderer = (
-  props: CustomCellRendererProps<Student> & { context: ActionCellContext<Student> }
+  props: CustomCellRendererProps<Student>
 ) => {
   const student = props.data;
-  const { onEdit, onDelete, onActivate, canMutate } = props.context || {};
+  const { onEdit, onDelete, onActivate } = props.context || {};
   const [isPending, startTransition] = useTransition();
 
-  if (!student || (canMutate !== undefined && !canMutate)) return null;
+  if (!student) return null;
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();

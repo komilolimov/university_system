@@ -46,30 +46,33 @@ export const StudentForm = ({ isOpen, onClose, student, onSubmitSuccess }: Stude
   // Sync state with student prop when editing
   useEffect(() => {
     if (isOpen) {
-      if (student) {
-        setFirstName(student.first_name || "");
-        setLastName(student.last_name || "");
-        setEmail(student.email || "");
-        setRegion(student.region || "Domestic");
-        setEnrollmentDate(student.enrollment_date || "");
-        setAdvisorId(student.advisor_id ? String(student.advisor_id) : "");
-        setGraduationDate(student.graduation_date || "");
-        setIsActive(student.is_active ?? true);
-        setPassword("");
-        setError(null);
-      } else {
-        // Reset to default for creation
-        setFirstName("");
-        setLastName("");
-        setEmail("");
-        setRegion("Domestic");
-        setEnrollmentDate(new Date().toISOString().split("T")[0]);
-        setAdvisorId("");
-        setGraduationDate("");
-        setIsActive(true);
-        setPassword("");
-        setError(null);
-      }
+      // Defer state update to avoid "Calling setState synchronously within an effect" warning
+      setTimeout(() => {
+        if (student) {
+          setFirstName(student.first_name || "");
+          setLastName(student.last_name || "");
+          setEmail(student.email || "");
+          setRegion(student.region || "Domestic");
+          setEnrollmentDate(student.enrollment_date || "");
+          setAdvisorId(student.advisor_id ? String(student.advisor_id) : "");
+          setGraduationDate(student.graduation_date || "");
+          setIsActive(student.is_active ?? true);
+          setPassword("");
+          setError(null);
+        } else {
+          // Reset to default for creation
+          setFirstName("");
+          setLastName("");
+          setEmail("");
+          setRegion("Domestic");
+          setEnrollmentDate(new Date().toISOString().split("T")[0]);
+          setAdvisorId("");
+          setGraduationDate("");
+          setIsActive(true);
+          setPassword("");
+          setError(null);
+        }
+      }, 0);
     }
   }, [isOpen, student]);
 
@@ -122,8 +125,12 @@ export const StudentForm = ({ isOpen, onClose, student, onSubmitSuccess }: Stude
 
         onSubmitSuccess();
         onClose();
-      } catch (err: any) {
-        setError(err.message || "Something went wrong.");
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message || "Something went wrong.");
+        } else {
+          setError("Something went wrong.");
+        }
       }
     });
   };

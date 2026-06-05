@@ -136,7 +136,15 @@ const handleActivate = (id: number) => {
   }
 
   startTransition(() => {
-    updateStudent(id, { is_active: true })
+    updateStudent(id, {
+      first_name: student.first_name,
+      last_name: student.last_name,
+      email: student.email,
+      region: student.region,
+      enrollment_date: student.enrollment_date,
+      advisor_id: student.advisor_id,
+      is_active: true,
+    })
       .then(() => {
         toast.success("Student activated");
         fetchRecords();
