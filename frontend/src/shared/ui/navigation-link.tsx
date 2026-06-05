@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { 
@@ -11,7 +10,8 @@ import {
   Settings, 
   Key, 
   User,
-  GraduationCap
+  GraduationCap,
+  ShieldCheck
 } from "lucide-react";
 
 const iconMap = {
@@ -22,7 +22,8 @@ const iconMap = {
   Settings,
   Key,
   User,
-  GraduationCap
+  GraduationCap,
+  ShieldCheck
 };
 
 export type IconName = keyof typeof iconMap;
@@ -44,7 +45,7 @@ export const NavigationLink = ({ href, label, icon, exact = false }: NavigationL
 
   return (
     <Link
-      href={href as any}
+      href={href as React.ComponentProps<typeof Link>["href"]}
       className={`flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-150 ease-in-out cursor-pointer select-none ${
         isActive
           ? "bg-neutral-100 text-neutral-900 font-medium"

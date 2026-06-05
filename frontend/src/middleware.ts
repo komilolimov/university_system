@@ -1,7 +1,13 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = [
+  "/dashboard", 
+  "/students", 
+  "/courses", 
+  "/employees", 
+  "/enrollments"
+];
 const authRoutes = ["/login", "/register"];
 
 // 🛡️ 1. СЛОВАРЬ ЗАГОЛОВКОВ БЕЗОПАСНОСТИ
@@ -47,8 +53,10 @@ export function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route));
   const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route));
 
+  const isServerAction = request.headers.has("next-action");
+
   // 🛡️ 4. ПРАВИЛА АВТОРИЗАЦИИ С УЛУЧШЕННЫМ UX
-  if (isProtectedRoute && !token) {
+  if (isProtectedRoute && !token && !isServerAction) {
     // Если кто-то пытается зайти без токена, отправляем на логин,
     // но запоминаем, куда он хотел попасть, чтобы вернуть его туда после входа
     const url = new URL("/login", request.url);

@@ -1,8 +1,7 @@
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Toaster } from "sonner";
+import { Toaster, BackgroundGlow } from "@/shared/ui";
 import { TestCredentials } from "@/widgets/dev-tools";
-import { BackgroundGlow } from "@/shared/ui";
 import "./globals.css";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="relative z-10 w-full h-full min-h-screen flex flex-col">
           {children}
         </div>
-        <Toaster position="top-center" richColors />
+        <Toaster position="top-center" closeButton  />
         <TestCredentials />
       </body>
     </html>
