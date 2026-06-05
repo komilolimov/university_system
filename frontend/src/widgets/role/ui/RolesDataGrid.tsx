@@ -107,11 +107,7 @@ export const RolesDataGrid = () => {
   }
 
   startTransition(() => {
-    updateRole(id, {
-      title: role.title,
-      is_faculty: role.is_faculty,
-      is_active: true,
-    })
+    updateRole(id, { is_active: true })
       .then(() => {
         toast.success("Role activated");
         fetchRoles(selectedStatus);

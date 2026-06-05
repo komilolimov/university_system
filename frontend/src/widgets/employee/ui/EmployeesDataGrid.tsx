@@ -125,14 +125,7 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
     );
 
     try {
-      await updateEmployee(id, {
-        first_name: employee.first_name,
-        last_name: employee.last_name,
-        email: employee.email,
-        role_id: employee.role_id,
-        department_id: employee.department_id,
-        is_active: true,
-      });
+      await updateEmployee(id, { is_active: true });
 
       fetchEmployees();
 
