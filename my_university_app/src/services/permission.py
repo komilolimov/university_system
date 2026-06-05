@@ -1,7 +1,7 @@
 from typing import List
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
-from src.models.employee import Permission, PermissionCreate, PermissionUpdate
+from src.models.permission import Permission, PermissionCreate, PermissionUpdate
 from src.repositories.rbac import permission_repository, role_repository
 from src.core.uow import UnitOfWork
 from src.core.exceptions import EntityNotFoundError

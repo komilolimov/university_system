@@ -2,7 +2,8 @@ from sqlmodel import Session, select
 from datetime import timedelta
 
 from src.core.exceptions import EntityNotFoundError, InvalidCredentialsError
-from src.models import Employee, Student, Role
+from src.models import Employee, Student
+from src.models.roles import Role
 from src.core.security import verify_password, create_access_token, create_refresh_token
 from src.core.redis_client import token_blocklist
 from src.core.config import settings
