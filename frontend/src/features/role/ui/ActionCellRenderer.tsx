@@ -4,16 +4,7 @@ import React, { useTransition } from "react";
 import type { ICellRendererParams } from "ag-grid-community";
 import type { Role } from "@/entities/role";
 
-export interface ActionCellContext<T> {
-  canMutate?: boolean;
-  onEdit: (data: T) => void;
-  onDelete: (id: number) => void;
-  onActivate: (id: number) => void;
-}
-
-export const ActionCellRenderer = (
-  params: ICellRendererParams<Role> & { context: ActionCellContext<Role> }
-) => {
+export const ActionCellRenderer = (params: ICellRendererParams<Role>) => {
   const [isPending, startTransition] = useTransition();
 
   if (!params.data) return null;

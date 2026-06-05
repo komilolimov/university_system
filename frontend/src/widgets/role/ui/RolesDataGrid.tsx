@@ -107,7 +107,11 @@ export const RolesDataGrid = () => {
   }
 
   startTransition(() => {
-    updateRole(id, { is_active: true })
+    updateRole(id, {
+      title: role.title,
+      is_faculty: role.is_faculty,
+      is_active: true,
+    })
       .then(() => {
         toast.success("Role activated");
         fetchRoles(selectedStatus);
@@ -203,7 +207,11 @@ export const RolesDataGrid = () => {
         <DataGrid
           rowData={filteredRoles}
           columnDefs={columnDefs}
-          context={gridContext}
+          context={{
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onActivate: handleActivate,
+          }}
           height={600}
         />
       </div>
