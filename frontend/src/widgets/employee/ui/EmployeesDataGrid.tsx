@@ -118,30 +118,16 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
     return;
   }
 
-  startTransition(() => {
-    const toastId = toast.loading(
-      "Activating employee...",
-      "Please wait."
-    );
-
     updateEmployee(id, { is_active: true })
       .then(() => {
+        toast.success("Employee activated");
         fetchEmployees();
-        toast.dismiss(toastId);
-        toast.success(
-          "Employee activated",
-          "Employee is now active."
-        );
       })
       .catch((err: unknown) => {
-        toast.dismiss(toastId);
         if (err instanceof Error) {
           toast.error("Failed to activate employee", err.message);
-        } else {
-          toast.error("Error", "Unexpected error occurred.");
         }
       });
-  });
 };
 
   // AG Grid Columns
