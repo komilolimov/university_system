@@ -1,4 +1,3 @@
-import React from "react";
 import { GraduationCap } from "lucide-react";
 import { NavigationLink, IconName } from "@/shared/ui";
 import { getJwtPayload } from "@/shared/auth/jwt";
@@ -57,7 +56,10 @@ export const Sidebar = async () => {
     {
       title: "Management",
       items: [
-        { href: "/students", label: "Students", icon: "GraduationCap" }
+        { href: "/students", label: "Students", icon: "GraduationCap" },
+        { href: "/employees", label: "Staff & Advisors", icon: "Users" },
+        { href: "/roles", label: "Role Management", icon: "ShieldCheck" },
+        { href: "/permissions", label: "Permissions", icon: "Key" }
       ],
     },
   ];
