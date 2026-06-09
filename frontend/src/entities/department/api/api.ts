@@ -4,11 +4,23 @@ import { apiClient } from "@/shared/api/client";
 import { getErrorMessage } from "@/shared/api/error";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import type { Department, DepartmentCreate, DepartmentUpdate } from "../model/types";
+import type { components } from "@/shared/api/schema";
 
-export const getDepartments = async (): Promise<Department[]> => {
+export interface GetDepartmentsParams {
+  q?: string | null;
+  skip?: number;
+  limit?: number;
+}
+
+export const getDepartments = async (params: GetDepartmentsParams = {}): Promise<Department[]> => {
+  const query: Record<string, string | number> = {};
+  if (params.q) query.q = params.q;
+  if (params.skip !== undefined) query.skip = params.skip;
+  query.limit = params.limit !== undefined ? params.limit : 100;
+
   try {
     const { data, error } = await apiClient.GET("/api/v1/departments/", {
-      params: { query: { limit: 100 }  }
+      params: { query }
     });
     if (error) {
       console.error("[getDepartments] API error:", JSON.stringify(error));
@@ -72,3 +84,5 @@ export const deleteDepartment = async (id: number): Promise<void> => {
     throw new Error(getErrorMessage(err));
   }
 };
+
+

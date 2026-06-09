@@ -1,4 +1,4 @@
-﻿import { apiClient } from "@/shared/api/client";
+import { apiClient } from "@/shared/api/client";
 import { getJwtPayload } from "@/shared/auth/jwt";
 import { EnrollmentCard } from "@/entities/enrollment";
 

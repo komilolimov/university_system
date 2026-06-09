@@ -12,7 +12,7 @@ export const getPermissions = async (): Promise<Permission[]> => {
       console.error("[getPermissions] API error:", JSON.stringify(error));
       throw new Error(getErrorMessage(error));
     }
-    return (data ) || [];
+    return (data as unknown as Permission[]) || [];
   } catch (err: unknown) {
     if (isRedirectError(err)) throw err;
     throw new Error(getErrorMessage(err));
@@ -22,13 +22,13 @@ export const getPermissions = async (): Promise<Permission[]> => {
 export const createPermission = async (data: PermissionCreate): Promise<Permission> => {
   try {
     const { data: responseData, error } = await apiClient.POST("/api/v1/permissions/", {
-      body: data ,
+      body: data as never,
     });
     if (error) {
       console.error("[createPermission] API error:", JSON.stringify(error));
       throw new Error(getErrorMessage(error));
     }
-    return responseData ;
+    return responseData as unknown as Permission;
   } catch (err: unknown) {
     if (isRedirectError(err)) throw err;
     throw new Error(getErrorMessage(err));
@@ -41,13 +41,13 @@ export const updatePermission = async (id: number, data: PermissionUpdate): Prom
       params: {
         path: { permission_id: id },
       },
-      body: data ,
+      body: data as never,
     });
     if (error) {
       console.error(`[updatePermission] API error on ${id}:`, JSON.stringify(error));
       throw new Error(getErrorMessage(error));
     }
-    return responseData ;
+    return responseData as unknown as Permission;
   } catch (err: unknown) {
     if (isRedirectError(err)) throw err;
     throw new Error(getErrorMessage(err));

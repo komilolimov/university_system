@@ -9,18 +9,21 @@ export const metadata: Metadata = {
 
 export default function RolesPage() {
   return (
-    <main className="fsd-container mx-auto my-8 flex flex-col gap-8 px-6 font-sans">
-      <header className="flex flex-col gap-2 border-b border-neutral-200 pb-4 select-none">
-        <h1 className="text-3xl font-extrabold tracking-tighter text-neutral-900">
-          Role Management
-        </h1>
-        <p className="text-neutral-500 font-medium">
-          Administer system roles, define faculty status, and manage access levels with the interactive AG Grid panel.
-        </p>
+    <main className="flex-1 flex flex-col h-full p-6 lg:p-8">
+      <header className="mb-8 border-b border-neutral-200 pb-6">
+        <div className="border-l-4 border-neutral-900 pl-4">
+          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+            Role Management
+          </h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
+            Administer system roles, define faculty status, and manage access levels with the interactive AG Grid panel.
+          </p>
+        </div>
       </header>
-      <section className="w-full h-full">
+      
+      <div className="flex-1 min-h-[600px] w-full">
         <RolesDataGrid />
-      </section>
+      </div>
     </main>
   );
 }
