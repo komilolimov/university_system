@@ -6,7 +6,8 @@ const protectedRoutes = [
   "/students", 
   "/courses", 
   "/employees", 
-  "/enrollments"
+  "/enrollments",
+  "student-programs",
 ];
 const authRoutes = ["/login", "/register"];
 

@@ -7,8 +7,7 @@ import {
   getEmployees,
   updateEmployee,
   deleteEmployee,
-  type Employee,
-  type RegionType,
+  type Employee
 } from "@/entities/employee";
 import { getRoles, type Role } from "@/entities/role";
 import { getDepartments, type Department } from "@/entities/department";
@@ -21,6 +20,7 @@ interface EmployeesDataGridProps {
 }
 
 export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) => {
+
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);

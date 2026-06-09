@@ -13,13 +13,11 @@ export const LoginForm = () => {
       toast.error("Sign In Failed", {
         description: state.error,
       });
-    } else if (state && !state.error) {
-      toast.success("Welcome back!");
     }
   }, [state]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-6 w-full">
+    <form action={formAction} className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-4">
         <AuthInput
           id="email"
@@ -29,6 +27,9 @@ export const LoginForm = () => {
           required
           autoComplete="email"
         />
+
+        {/* НИКАКИХ relative И ДОПОЛНИТЕЛЬНЫХ КНОПОК ЗДЕСЬ! 
+            Просто вызываем AuthInput, он всё сделает сам. */}
         <AuthInput
           id="password"
           name="password"
@@ -38,11 +39,11 @@ export const LoginForm = () => {
           autoComplete="current-password"
         />
       </div>
-      
-      <button 
-        type="submit" 
+
+      <button
+        type="submit"
         disabled={isPending}
-        className="w-full h-10 px-4 py-2 bg-neutral-900 text-white font-medium text-sm rounded-md hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+        className="h-10 w-full cursor-pointer rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isPending ? "Signing in..." : "Sign In"}
       </button>

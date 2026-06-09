@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useTransition } from "react";
+import { useState, useEffect, useMemo, useTransition } from "react";
 import { DataGrid } from "@/shared/ui";
 import { 
   getStudents, 
@@ -14,28 +14,26 @@ import {
 import { StudentForm, ActionCellRenderer, StudentFiltersToolbar } from "@/features/student";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import { toast } from "@/shared/lib/toast";
+import { Plus } from "lucide-react";
 
-export const StudentsDataGrid = () => {
+interface StudentsDataGridProps {
+  canMutate?: boolean;
+}
+
+export const StudentsDataGrid = ({ canMutate = true }: StudentsDataGridProps) => {
 
   const [students, setStudents] = useState<Student[]>([]);
   const [advisors, setAdvisors] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Filter States
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<RegionType | "">("");
   const [selectedAdvisor, setSelectedAdvisor] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<"all" | "active" | "inactive">("active");
-
-  // Form Modal States
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-
   const [isPending, startTransition] = useTransition();
 
-  // Debounce search query
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -54,13 +52,10 @@ export const StudentsDataGrid = () => {
       });
   }, []);
 
-  // Fetch student records based on filter metrics
+
   const fetchRecords = () => {
-    // Schedule state updates asynchronously to avoid the
-    // "Calling setState synchronously within an effect" linter warning.
     const timer = setTimeout(() => {
       setLoading(true);
-      setError(null);
     }, 0);
     
     const parsedAdvisorId = selectedAdvisor ? parseInt(selectedAdvisor, 10) : null;
@@ -78,9 +73,10 @@ export const StudentsDataGrid = () => {
       })
       .catch((err: unknown) => {
         if (err instanceof Error) {
-          setError(err.message || "Failed to load students.");
-        } else {
-          setError("An unexpected error occurred while loading students.");
+          toast.error(
+            "Failed to load students",
+            err.message
+          );
         }
       })
       .finally(() => setLoading(false));
@@ -119,13 +115,26 @@ export const StudentsDataGrid = () => {
   };
 
   // 2. Показ тоста с подтверждением при клике на корзину
-  const handleDelete = (id: number) => {
-    toast.confirm(
-      "Are you sure?", 
-      "This will move the student to the inactive list.", 
-      () => executeDelete(id)
-    );
-  };
+ const handleDelete = (id: number) => {
+  toast.confirm(
+    "Archive Student",
+    "Are you sure you want to archive this student? They will no longer appear in the active directory.",
+    () => {
+      startTransition(() => {
+        deleteStudent(id)
+          .then(() => {
+            toast.success("Student archived");
+            fetchRecords();
+          })
+          .catch((err: unknown) => {
+            if (err instanceof Error) {
+              toast.error("Failed to archive", err.message);
+            }
+          });
+      });
+    }
+  );
+};
 
 const handleActivate = (id: number) => {
   const student = students.find((s) => s.id === id);
@@ -135,25 +144,46 @@ const handleActivate = (id: number) => {
     return;
   }
 
-  startTransition(() => {
-    updateStudent(id, {
-      first_name: student.first_name,
-      last_name: student.last_name,
-      email: student.email,
-      region: student.region,
-      enrollment_date: student.enrollment_date,
-      advisor_id: student.advisor_id,
-      is_active: true,
-    })
-      .then(() => {
-        toast.success("Student activated");
-        fetchRecords();
-      })
-      .catch((err: unknown) => {
-        if (err instanceof Error) {
-          toast.error("Failed to activate student", err.message);
-        }
+  startTransition(async () => {
+    const toastId = toast.loading(
+      "Activating student...",
+      "Please wait."
+    );
+
+    try {
+      await updateStudent(id, {
+        first_name: student.first_name,
+        last_name: student.last_name,
+        email: student.email,
+        region: student.region,
+        enrollment_date: student.enrollment_date,
+        advisor_id: student.advisor_id,
+        is_active: true,
       });
+
+      fetchRecords();
+
+      toast.dismiss(toastId);
+
+      toast.success(
+        "Student activated",
+        "Student is now active."
+      );
+    } catch (err: unknown) {
+      toast.dismiss(toastId);
+
+      if (err instanceof Error) {
+        toast.error(
+          "Failed to activate student",
+          err.message
+        );
+      } else {
+        toast.error(
+          "Error",
+          "Unexpected error occurred."
+        );
+      }
+    }
   });
 };
 
@@ -165,77 +195,98 @@ const handleActivate = (id: number) => {
   }), [students]);
 
   // Column definitions for AG Grid
-  const columnDefs = useMemo<ColDef<Student>[]>(() => [
+const columnDefs = useMemo<ColDef<Student>[]>(() => {
+  const cols: ColDef<Student>[] = [
     {
-      field: "id",
-      headerName: "ID",
-      maxWidth: 80,
-      filter: "agNumberColumnFilter",
-      sort: "asc",
+      field: "first_name",
+      headerName: "First Name",
+      flex: 1,
     },
     {
-      headerName: "Full Name",
-      valueGetter: (params) => {
-        if (!params.data) return "";
-        return `${params.data.first_name} ${params.data.last_name}`;
-      },
-      minWidth: 160,
+      field: "last_name",
+      headerName: "Last Name",
+      flex: 1,
     },
     {
       field: "email",
-      headerName: "Email Address",
-      minWidth: 200,
+      headerName: "Email",
+      flex: 1.5,
     },
     {
       field: "region",
       headerName: "Region",
-      maxWidth: 120,
+      flex: 1,
     },
     {
       field: "enrollment_date",
       headerName: "Enrollment Date",
-      maxWidth: 150,
-      valueFormatter: (params) => params.value || "N/A",
+      flex: 1,
+      valueFormatter: (params) => params.value || "-",
     },
     {
-      headerName: "Academic Advisor",
-      minWidth: 180,
+      headerName: "Advisor",
+      flex: 1.5,
       valueGetter: (params) => {
         const data = params.data;
-        if (!data || !data.advisor_id) return "Unassigned";
-        const advisor = advisors.find((a) => a.id === data.advisor_id);
-        return advisor ? `${advisor.first_name} ${advisor.last_name}` : `ID: ${data.advisor_id}`;
+        if (!data?.advisor_id) return "Unassigned";
+
+        const advisor = advisors.find(
+          (a) => a.id === data.advisor_id
+        );
+
+        return advisor
+          ? `${advisor.first_name} ${advisor.last_name}`
+          : "Unknown";
       },
     },
     {
       field: "is_active",
       headerName: "Status",
-      maxWidth: 120,
-      cellRenderer: (params: ICellRendererParams<Student>) => {
-        const active = params.value as boolean;
+      width: 120,
+      valueFormatter: (params) =>
+        params.value ? "Active" : "Inactive",
+      cellRenderer: (
+        params: ICellRendererParams<Student, boolean>
+      ) => {
+        const isActive = params.value;
+
         return (
           <div className="h-full flex items-center">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold select-none transition-colors border ${
-              active 
-                ? "bg-green-50 text-green-700 border-green-200" 
-                : "bg-neutral-100 text-neutral-500 border-neutral-200"
-            }`}>
-              <span className={`h-1.5 w-1.5 rounded-full mr-1.5 ${active ? "bg-green-500" : "bg-neutral-400"}`} />
-              {active ? "Active" : "Inactive"}
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold select-none transition-colors border ${
+                isActive
+                  ? "bg-green-50 text-green-700 border-green-200"
+                  : "bg-neutral-100 text-neutral-500 border-neutral-200"
+              }`}
+            >
+              <span
+                className={`h-1.5 w-1.5 rounded-full mr-1.5 ${
+                  isActive
+                    ? "bg-green-500"
+                    : "bg-neutral-400"
+                }`}
+              />
+              {isActive ? "Active" : "Inactive"}
             </span>
           </div>
         );
       },
     },
-    {
+  ];
+
+  if (canMutate) {
+    cols.push({
       headerName: "Actions",
-      maxWidth: 160,
+      flex: 1,
       sortable: false,
       filter: false,
-      resizable: false,
+      pinned: "right",
       cellRenderer: ActionCellRenderer,
-    }
-  ], [advisors]);
+    });
+  }
+
+  return cols;
+}, [advisors, canMutate]);
 
   // Open creation modal
   const handleAddNew = () => {
@@ -244,19 +295,29 @@ const handleActivate = (id: number) => {
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full h-full">
+    <div className="w-full flex flex-col gap-4">  
       {/* Action Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 select-none">
-        <h2 className="text-lg font-semibold tracking-tighter text-neutral-900">
-          Student Registrations ({students.length})
+      <div className="flex justify-between items-center">
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight text-neutral-900">
+          Student Directory
         </h2>
+
+        <p className="text-sm text-neutral-500">
+          Manage student records and advisor assignments
+        </p>
+      </div>
+
+      {canMutate && (
         <button
           onClick={handleAddNew}
-          className="h-9 px-4 text-sm font-semibold rounded-md bg-black text-neutral-50 hover:bg-neutral-900 active:bg-black transition-colors cursor-pointer select-none"
+          className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
         >
+          <Plus className="w-4 h-4" />
           Add Student
         </button>
-      </div>
+      )}
+    </div>
 
       {/* Filter Toolbar */}
       <StudentFiltersToolbar
@@ -271,41 +332,27 @@ const handleActivate = (id: number) => {
         advisors={advisors}
       />
 
-      {/* Main Grid Wrapper */}
-      <div className="w-full h-full relative">
-        {loading && (
-          <div className="absolute inset-0 bg-neutral-50/70 z-10 flex items-center justify-center backdrop-blur-3xs rounded-lg select-none">
-            <div className="flex items-center gap-2 px-4 py-2 border border-neutral-200 bg-neutral-100 rounded-md shadow-sm">
-              <svg className="animate-spin h-4 w-4 text-black" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              <span className="text-xs font-semibold text-neutral-700">Loading student directory...</span>
-            </div>
+      <div className="relative border border-neutral-200 rounded-lg overflow-hidden bg-white shadow-sm">
+        {(loading || isPending) && (
+          <div className="absolute inset-0 z-10 bg-white/50 backdrop-blur-[1px] flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-
-        {error && (
-          <div className="p-6 border border-red-200 bg-red-50 text-red-700 rounded-lg text-sm font-semibold select-none mb-4">
-            Error: {error}
-          </div>
-        )}
-
         <DataGrid
           rowData={students}
           columnDefs={columnDefs}
-          context={gridContext}
-          height={540}
+          context={{
+            canMutate,
+            onEdit: handleEdit,
+            onDelete: handleDelete,
+            onActivate: handleActivate,
+          }}
+          height={600}
         />
       </div>
-
-      {/* Shared Edit/Create Student Form Modal */}
       <StudentForm
         isOpen={isFormOpen}
-        onClose={() => {
-          setIsFormOpen(false);
-          setEditingStudent(null);
-        }}
+        onClose={() => setIsFormOpen(false)}
         student={editingStudent}
         onSubmitSuccess={fetchRecords}
       />

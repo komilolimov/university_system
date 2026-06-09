@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { HelpCircle, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
@@ -16,9 +16,10 @@ export const TestCredentials = () => {
   }
 
   // Защита 2: Показываем ТОЛЬКО на странице логина
-  if (pathname !== "/login") {
-    return null;
-  }
+// Защита 2: Показываем ТОЛЬКО на странице логина
+if (pathname !== "/login") {
+  return null;
+}
 
   const credentials = [
     {
@@ -35,14 +36,11 @@ export const TestCredentials = () => {
 
   const handleCopy = async (text: string, key: string) => {
     try {
-      // Пытаемся использовать современный API
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
       } else {
-        // Fallback для HTTP/локальной сети
         const textArea = document.createElement("textarea");
         textArea.value = text;
-        // Прячем элемент с экрана
         textArea.style.position = "absolute";
         textArea.style.left = "-999999px";
         document.body.prepend(textArea);
@@ -61,80 +59,28 @@ export const TestCredentials = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 font-sans">
-      {/* Trigger Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center h-10 w-10 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded-full shadow-md transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
-        aria-label="Test Credentials"
-      >
-        <HelpCircle className="h-5 w-5" />
-      </button>
+    // z-[9999] гарантирует, что блок будет поверх абсолютно всех элементов на странице
+    <div className="fixed bottom-4 right-4 z-[9999] font-sans">
+      
+      {/* Явный относительный контейнер для правильного позиционирования карточки */}
+      <div className="relative flex flex-col items-end">
+        
+        {/* Popover Card */}
+        {isOpen && (
+         '123123'
+        )}
 
-      {/* Popover Card */}
-      {isOpen && (
-        <div className="absolute bottom-12 right-0 w-80 bg-white border border-neutral-200 rounded-xl shadow-xl p-4 transition-all duration-200 ease-in-out">
-          <div className="flex flex-col gap-3">
-            <div>
-              <h3 className="text-sm font-semibold text-neutral-900 tracking-tight">
-                Test Credentials
-              </h3>
-              <p className="text-xs text-neutral-500">
-                Click any value below to copy it.
-              </p>
-            </div>
+        {/* Trigger Button */}
+        <button
+          type="button"
+          onClick={() => setIsOpen(isOpen)}
+          className="flex items-center justify-center h-10 w-10 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded-full shadow-md transition-all hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
+          aria-label="Test Credentials"
+        >
+          <HelpCircle className="h-5 w-5" />
+        </button>
 
-            <div className="h-px bg-neutral-100 my-1" />
-
-            <div className="flex flex-col gap-4">
-              {credentials.map((cred) => (
-                <div key={cred.role} className="flex flex-col gap-1.5">
-                  <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
-                    {cred.role}
-                  </span>
-                  <div className="bg-neutral-50 border border-neutral-100 rounded-lg p-2.5 flex flex-col gap-1 text-xs">
-                    {/* Email Row */}
-                    <div
-                      onClick={() => handleCopy(cred.email, `${cred.role}-email`)}
-                      className="flex items-center justify-between py-1 px-1.5 rounded hover:bg-neutral-100 cursor-pointer transition-colors group"
-                    >
-                      <span className="text-neutral-500">Email:</span>
-                      <div className="flex items-center gap-1.5">
-                        <code className="font-mono text-neutral-900 text-[11px]">
-                          {cred.email}
-                        </code>
-                        {copiedKey === `${cred.role}-email` ? (
-                          <Check className="h-3 w-3 text-emerald-500" />
-                        ) : (
-                          <Copy className="h-3 w-3 text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Password Row */}
-                    <div
-                      onClick={() => handleCopy(cred.password, `${cred.role}-password`)}
-                      className="flex items-center justify-between py-1 px-1.5 rounded hover:bg-neutral-100 cursor-pointer transition-colors group"
-                    >
-                      <span className="text-neutral-500">Password:</span>
-                      <div className="flex items-center gap-1.5">
-                        <code className="font-mono text-neutral-900 text-[11px]">
-                          {cred.password}
-                        </code>
-                        {copiedKey === `${cred.role}-password` ? (
-                          <Check className="h-3 w-3 text-emerald-500" />
-                        ) : (
-                          <Copy className="h-3 w-3 text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

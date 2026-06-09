@@ -11,7 +11,21 @@ import {
   Key, 
   User,
   GraduationCap,
-  ShieldCheck
+  ShieldCheck,
+  CalendarCheck,
+  CalendarDays,
+  Activity,
+  List,
+  School,
+  Microscope,
+  Award,
+  Building,
+  Building2,
+  DoorOpen,
+  FileText,
+  Briefcase,
+  FileSignature,
+  BookUser
 } from "lucide-react";
 
 const iconMap = {
@@ -23,7 +37,21 @@ const iconMap = {
   Key,
   User,
   GraduationCap,
-  ShieldCheck
+  ShieldCheck,
+  CalendarCheck,
+  CalendarDays,
+  Activity,
+  List,
+  School,
+  Microscope,
+  Award,
+  Building,
+  Building2,
+  DoorOpen,
+  FileText,
+  Briefcase,
+  FileSignature,
+  BookUser
 };
 
 export type IconName = keyof typeof iconMap;
