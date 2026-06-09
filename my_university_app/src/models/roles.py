@@ -35,10 +35,12 @@ class RoleRead(RoleBase):
     id: int
     is_active: bool  # Полезно отдавать на фронтенд статус роли
 
+from src.models.permission import PermissionRead
+
 class RoleReadWithPermissions(RoleBase):
     id: int
     is_active: bool
-    permissions: list["PermissionRead"] = [] # В кавычках из-за TYPE_CHECKING
+    permissions: list[PermissionRead] = []
 
 class RoleUpdate(SQLModel):
     title: Optional[str] = None

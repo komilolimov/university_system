@@ -17,7 +17,14 @@ from src.models.employee import (
 
 from src.models.student import Student, StudentCreate, StudentRead, StudentUpdate, StudentProgram, StudentProgramCreate, StudentProgramRead, StudentProgramUpdate
 from src.models.program import DegreeProgram, DegreeProgramCreate, DegreeProgramRead, DegreeProgramUpdate, ProgramRequirement, ProgramRequirementCreate, ProgramRequirementRead, ProgramRequirementUpdate
-from src.models.course import AcademicTerm, AcademicTermCreate, AcademicTermRead, AcademicTermUpdate, CourseCatalog, CourseCatalogCreate, CourseCatalogRead, CourseCatalogUpdate, CourseOffering, CourseOfferingCreate, CourseOfferingRead, CourseOfferingUpdate, Enrollment, EnrollmentCreate, EnrollmentRead, EnrollmentUpdate
+from src.models.terms import AcademicTerm, AcademicTermCreate, AcademicTermRead, AcademicTermUpdate
+
+
+from src.models.course import (
+    CourseCatalog, CourseCatalogCreate, CourseCatalogRead, CourseCatalogUpdate, 
+    CourseOffering, CourseOfferingCreate, CourseOfferingRead, CourseOfferingUpdate, 
+    Enrollment, EnrollmentCreate, EnrollmentRead, EnrollmentUpdate
+)
 
 __all__ = [
     "SQLModel",

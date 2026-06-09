@@ -93,7 +93,13 @@ class EmployeeService:
             # Превращаем данные для обновления в словарь (только те, что были переданы)
             update_data = obj_in.model_dump(exclude_unset=True)
             
-            return employee_repository.update(session=session, db_obj=db_obj, obj_in=update_data)
+            updated_employee = employee_repository.update(session=session, db_obj=db_obj, obj_in=update_data)
+        
+        # ОБЯЗАТЕЛЬНО: делаем refresh, чтобы подгрузить свежие данные из базы (включая связи)
+        session.flush() # сохраняем изменения в транзакции
+        session.refresh(updated_employee) # обновляем объект данными из БД
+        
+        return updated_employee
 
     def change_password(self, session: Session, id: int, obj_in: ChangePasswordRequest) -> None:
         with UnitOfWork(session):

@@ -91,6 +91,15 @@ def change_employee_password(
 # ==========================================
 experience_router = APIRouter(prefix="/employee-experiences", tags=["Employee Experiences"])
 
+@experience_router.get("/", response_model=List[EmployeeExperienceRead])
+def get_experiences(
+    session: SessionDep, 
+    current_user: CurrentUserDep,
+    skip: int = Query(0, ge=0), 
+    limit: int = Query(100, ge=1, le=100)
+):
+    return employee_experience_service.get_all(session=session, skip=skip, limit=limit)
+
 @experience_router.post("/{employee_id}", response_model=EmployeeExperienceRead, dependencies=[Depends(RequirePermission(["employees:write"]))])
 def create_experience(employee_id: int, obj_in: EmployeeExperienceCreate, session: SessionDep):
     return employee_experience_service.create(session=session, employee_id=employee_id, obj_in=obj_in)

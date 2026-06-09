@@ -70,10 +70,11 @@ def get_course_offerings(
     primary_instructor_id: Optional[int] = Query(None),
     room_id: Optional[int] = Query(None),
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=100),
+    is_active: Optional[bool] = Query(None),
 ):
     return course_offering_service.get_all(
-        session=session, term_id=term_id, catalog_id=catalog_id, primary_instructor_id=primary_instructor_id, room_id=room_id, skip=skip, limit=limit
+        session=session, term_id=term_id, catalog_id=catalog_id, primary_instructor_id=primary_instructor_id, room_id=room_id, skip=skip, limit=limit, is_active=is_active
     )
 
 @course_offering_router.get("/{offering_id}", response_model=CourseOfferingRead)

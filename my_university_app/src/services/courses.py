@@ -3,7 +3,6 @@ from sqlmodel import Session, select, func
 from typing import List, Optional
 from sqlalchemy import or_
 from src.core.exceptions import EntityNotFoundError, CapacityExceededError, DuplicateEnrollmentError
-from sqlmodel import Session
 from src.repositories.courses import course_catalog_repository, course_offering_repository, enrollment_repository
 from src.models.course import (
     CourseCatalog, CourseCatalogCreate, CourseCatalogUpdate,
@@ -20,7 +19,7 @@ class CourseCatalogService:
         q: Optional[str] = None,
         department_id: Optional[int] = None,
         credits: Optional[int] = None,
-        is_active: Optional[bool] = None,
+        is_active: Optional[bool] = True, # По умолчанию отдаем только активные курсы
         skip: int = 0, 
         limit: int = 100
     ) -> List[CourseCatalog]:
@@ -60,8 +59,9 @@ class CourseCatalogService:
     def delete(self, session: Session, id: int) -> dict:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
-            course_catalog_repository.delete(session=session, id=db_obj.id)
-            return {"Success": "Course catalog entry deleted"}
+            # Soft delete: переводим в неактивный статус вместо удаления из БД
+            course_catalog_repository.update(session=session, db_obj=db_obj, obj_in={"is_active": False})
+            return {"Success": "Course catalog entry archived (Soft Deleted)"}
 
 
 class CourseOfferingService:
@@ -72,6 +72,7 @@ class CourseOfferingService:
         catalog_id: Optional[int] = None,
         primary_instructor_id: Optional[int] = None,
         room_id: Optional[int] = None,
+        is_active: Optional[bool] = True, # По умолчанию отдаем только активные
         skip: int = 0, 
         limit: int = 100
     ) -> List[CourseOffering]:
@@ -84,6 +85,8 @@ class CourseOfferingService:
             statement = statement.where(CourseOffering.primary_instructor_id == primary_instructor_id)
         if room_id is not None:
             statement = statement.where(CourseOffering.room_id == room_id)
+        if is_active is not None:
+            statement = statement.where(CourseOffering.is_active == is_active)
             
         statement = statement.offset(skip).limit(limit)
         return session.exec(statement).all()
@@ -106,8 +109,9 @@ class CourseOfferingService:
     def delete(self, session: Session, id: int) -> dict:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
-            course_offering_repository.delete(session=session, id=db_obj.id)
-            return {"Success": "Course offering deleted"}
+            # Soft delete
+            course_offering_repository.update(session=session, db_obj=db_obj, obj_in={"is_active": False})
+            return {"Success": "Course offering archived (Soft Deleted)"}
 
 
 class EnrollmentService:
@@ -145,16 +149,20 @@ class EnrollmentService:
     def delete(self, session: Session, student_id: int, offering_id: int) -> dict:
         with UnitOfWork(session):
             db_obj = self.get(session=session, student_id=student_id, offering_id=offering_id)
-            enrollment_repository.delete(session=session, student_id=db_obj.student_id, offering_id=db_obj.offering_id)
-            return {"Success": "Enrollment deleted"}
+            
+            # Soft delete для записей: меняем статус (например, на Dropped/Cancelled)
+            # Убедись, что EnrollmentStatus.Dropped существует в твоем Enum
+            enrollment_repository.update(
+                session=session, 
+                db_obj=db_obj, 
+                obj_in={"status": EnrollmentStatus.Dropped}
+            )
+            return {"Success": "Enrollment cancelled (Soft Deleted)"}
 
     def register_student(self, session: Session, student_id: int, offering_id: int) -> Enrollment:
-        # Начинаем управляемую транзакцию
         with UnitOfWork(session) as uow:
             
             # 1. БЛОКИРОВКА (FOR UPDATE)
-            # Мы находим курс и говорим базе: "Заблокируй эту строку! Пока я не закончу, 
-            # никто другой не может читать или менять этот курс".
             offering = session.exec(
                 select(CourseOffering)
                 .where(CourseOffering.id == offering_id)
@@ -164,7 +172,11 @@ class EnrollmentService:
             if not offering:
                 raise EntityNotFoundError("CourseOffering", offering_id)
 
-            # 2. Проверка дубликатов
+            # Проверка: нельзя записаться на удаленный (архивный) курс
+            if not getattr(offering, "is_active", True):
+                raise ValueError("Cannot enroll in an inactive course offering")
+
+            # 2. Проверка дубликатов или восстановление (Soft Undelete)
             existing_enrollment = session.exec(
                 select(Enrollment)
                 .where(Enrollment.student_id == student_id)
@@ -172,6 +184,14 @@ class EnrollmentService:
             ).one_or_none()
 
             if existing_enrollment:
+                # Если студент был "мягко удален" (Dropped), восстанавливаем его запись
+                if existing_enrollment.status != EnrollmentStatus.Enrolled:
+                    return enrollment_repository.update(
+                        session=session, 
+                        db_obj=existing_enrollment, 
+                        obj_in={"status": EnrollmentStatus.Enrolled}
+                    )
+                # Если статус и так Enrolled, бросаем ошибку дубликата
                 raise DuplicateEnrollmentError(student_id=student_id, course_id=offering_id)
 
             # 3. Проверка мест (считаем только тех, кто реально записан)
@@ -193,11 +213,9 @@ class EnrollmentService:
             )
             
             session.add(new_enrollment)
-            session.flush() # Отправляем SQL, но транзакция ждет выхода из блока with
+            session.flush() 
             
             return new_enrollment
-
-enrollment_service = EnrollmentService()
 
 course_catalog_service = CourseCatalogService()
 course_offering_service = CourseOfferingService()

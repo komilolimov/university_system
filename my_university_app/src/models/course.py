@@ -1,4 +1,3 @@
-# cspell:ignore ondelete
 from typing import Optional
 from datetime import date
 from decimal import Decimal
@@ -6,25 +5,7 @@ from sqlmodel import SQLModel, Field
 from src.models.base import TimestampMixin
 from src.models.enums import EnrollmentStatus
 
-class AcademicTermBase(SQLModel):
-    name: str = Field(unique=True)
-    start_date: date
-    end_date: date
 
-class AcademicTerm(AcademicTermBase, TimestampMixin, table=True):
-    __tablename__ = "academic_terms"
-    id: Optional[int] = Field(default=None, primary_key=True)
-
-class AcademicTermCreate(AcademicTermBase):
-    pass
-
-class AcademicTermRead(AcademicTermBase):
-    id: int
-
-class AcademicTermUpdate(SQLModel):
-    name: Optional[str] = None
-    start_date: Optional[date] = None
-    end_date: Optional[date] = None
 
 class CourseCatalogBase(SQLModel):
     code: str = Field(unique=True)
@@ -59,6 +40,7 @@ class CourseOfferingBase(SQLModel):
     term_id: int = Field(foreign_key="academic_terms.id")
     primary_instructor_id: int = Field(foreign_key="employees.id")
     room_id: Optional[int] = Field(default=None, foreign_key="rooms.id")
+    is_active: bool = Field(default=True, sa_column_kwargs={"server_default": "true"})
 
 class CourseOffering(CourseOfferingBase, TimestampMixin, table=True):
     __tablename__ = "course_offerings"
@@ -77,6 +59,9 @@ class CourseOfferingUpdate(SQLModel):
     term_id: Optional[int] = None
     primary_instructor_id: Optional[int] = None
     room_id: Optional[int] = None
+    
+    # ДОБАВИТЬ ЭТУ СТРОКУ:
+    is_active: Optional[bool] = None
 
 class EnrollmentBase(SQLModel):
     status: EnrollmentStatus
