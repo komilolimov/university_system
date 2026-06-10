@@ -9,6 +9,10 @@ import {
   type CourseOfferingCreate,
   type CourseOfferingUpdate,
 } from "@/entities/course-offerings";
+import { getCourseCatalogs, type CourseCatalog } from "@/entities/course-catalog";
+import { getTerms, type Term } from "@/entities/terms";
+import { getEmployees, type Employee } from "@/entities/employee";
+import { getRooms, type Room } from "@/entities/rooms";
 
 interface CourseOfferingFormProps {
   isOpen: boolean;
@@ -23,6 +27,11 @@ export const CourseOfferingForm = ({
   offering,
   onSubmitSuccess,
 }: CourseOfferingFormProps) => {
+  const [catalogs, setCatalogs] = useState<CourseCatalog[]>([]);
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+
   const [formData, setFormData] = useState<CourseOfferingCreate>({
     catalog_id: 0,
     term_id: 0,
@@ -37,6 +46,19 @@ export const CourseOfferingForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (isOpen) {
+      Promise.all([
+        getCourseCatalogs({ limit: 100 }),
+        getTerms(),
+        getEmployees({ limit: 100 }),
+        getRooms({ limit: 100 })
+      ]).then(([catalogsData, termsData, employeesData, roomsData]) => {
+        setCatalogs(catalogsData);
+        setTerms(termsData);
+        setEmployees(employeesData);
+        setRooms(roomsData);
+      }).catch(console.error);
+    }
     const timer = setTimeout(() => {
       if (offering && isOpen) {
         setFormData({
@@ -104,19 +126,78 @@ export const CourseOfferingForm = ({
         <form onSubmit={handleSubmit} className="flex flex-col p-6 gap-6 overflow-y-auto">
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-neutral-500 mb-1.5">Course Catalog ID</label>
-              <input type="number" required min={1} value={formData.catalog_id || ""} onChange={(e) => setFormData({ ...formData, catalog_id: parseInt(e.target.value) })} className={inputClassName} />
+              <label className="block text-xs font-medium text-neutral-500 mb-1.5">Course Catalog</label>
+              <select 
+                required 
+                value={formData.catalog_id || ""} 
+                onChange={(e) => setFormData({ ...formData, catalog_id: parseInt(e.target.value) })} 
+                className={`${inputClassName} appearance-none`}
+              >
+                <option value="" disabled>Select a course</option>
+                {catalogs.map(c => (
+                  <option key={c.id} value={c.id}>{c.code} - {c.title}</option>
+                ))}
+              </select>
             </div>
+            
+            {/* Term */}
             <div>
-              <label className="block text-xs font-medium text-neutral-500 mb-1.5">Term ID</label>
-              <input type="number" required min={1} value={formData.term_id || ""} onChange={(e) => setFormData({ ...formData, term_id: parseInt(e.target.value) })} className={inputClassName} />
+              <label className="block text-xs font-medium text-neutral-500 mb-1.5">Term</label>
+              <select 
+                required 
+                value={formData.term_id || ""} 
+                onChange={(e) => setFormData({ ...formData, term_id: parseInt(e.target.value) })} 
+                className={`${inputClassName} appearance-none`}
+              >
+                <option value="" disabled>Select a term</option>
+                {terms.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-               <div className="col-span-2"><label className="block text-xs font-medium text-neutral-500 mb-1.5">Primary Instructor ID</label><input type="number" required min={1} value={formData.primary_instructor_id || ""} onChange={(e) => setFormData({ ...formData, primary_instructor_id: e.target.value ? parseInt(e.target.value) : 0 })} className={inputClassName} /></div>
-               <div><label className="block text-xs font-medium text-neutral-500 mb-1.5">Room ID</label><input type="number" value={formData.room_id || ""} onChange={(e) => setFormData({ ...formData, room_id: e.target.value ? parseInt(e.target.value) : null })} className={inputClassName} /></div>
-            </div>
+
+            {/* Primary Instructor */}
             <div>
-              <div className="md:col-span-2"><label className="block text-xs font-medium text-neutral-500 mb-1.5">Schedule</label><input type="text" value={formData.schedule_blocks || ""} onChange={(e) => setFormData({ ...formData, schedule_blocks: e.target.value })} className={inputClassName} /></div>
+              <label className="block text-xs font-medium text-neutral-500 mb-1.5">Primary Instructor</label>
+              <select 
+                required 
+                value={formData.primary_instructor_id || ""} 
+                onChange={(e) => setFormData({ ...formData, primary_instructor_id: parseInt(e.target.value) })} 
+                className={`${inputClassName} appearance-none`}
+              >
+                <option value="" disabled>Select an instructor</option>
+                {employees.map(e => (
+                  <option key={e.id} value={e.id}>{e.first_name} {e.last_name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Room */}
+            <div>
+              <label className="block text-xs font-medium text-neutral-500 mb-1.5">Room (Optional)</label>
+              <select 
+                value={formData.room_id || ""} 
+                onChange={(e) => setFormData({ ...formData, room_id: e.target.value ? parseInt(e.target.value) : null })} 
+                className={`${inputClassName} appearance-none`}
+              >
+                <option value="">No Room Assigned</option>
+                {rooms.map(r => (
+                  <option key={r.id} value={r.id}>{r.room_number} (Cap: {r.capacity})</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            {/* Schedule Blocks */}
+            <div className="col-span-2">
+              <label className="block text-xs font-medium text-neutral-500 mb-1.5">Schedule</label>
+              <input
+                type="datetime-local"
+                value={formData.schedule_blocks || ""}
+                onChange={(e) => setFormData({ ...formData, schedule_blocks: e.target.value })}
+                className={inputClassName}
+              />
             </div>
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1.5">Capacity</label>

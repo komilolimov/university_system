@@ -9,12 +9,20 @@ import {
   updateCourseOffering,
   type CourseOffering,
 } from "@/entities/course-offerings";
-import { CourseOfferingForm, ActionCellRenderer, CourseOfferingsFiltersToolbar } from "@/features/course-offerings";
+import { ActionCellRenderer, CourseOfferingForm, CourseOfferingsFiltersToolbar } from "@/features/course-offerings";
+import { getCourseCatalogs, type CourseCatalog } from "@/entities/course-catalog";
+import { getTerms, type Term } from "@/entities/terms";
+import { getEmployees, type Employee } from "@/entities/employee";
+import { getRooms, type Room } from "@/entities/rooms";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import { toast } from "@/shared/lib/toast";
 
 export const CourseOfferingsDataGrid = () => {
   const [offerings, setOfferings] = useState<CourseOffering[]>([]);
+  const [catalogs, setCatalogs] = useState<CourseCatalog[]>([]);
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
 
@@ -33,7 +41,6 @@ export const CourseOfferingsDataGrid = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch Offerings
   const fetchOfferings = (status: "all" | "active" | "inactive" = selectedStatus) => {
     const timer = setTimeout(() => setLoading(true), 0);
     
@@ -41,10 +48,20 @@ export const CourseOfferingsDataGrid = () => {
     if (status === "active") isActiveParam = true;
     if (status === "inactive") isActiveParam = false;
     
-    getCourseOfferings({ is_active: isActiveParam })
-      .then((data) => {
+    Promise.all([
+      getCourseOfferings({ is_active: isActiveParam }),
+      getCourseCatalogs({ limit: 100 }),
+      getTerms(),
+      getEmployees({ limit: 100 }),
+      getRooms({ limit: 100 })
+    ])
+      .then(([data, catalogsData, termsData, employeesData, roomsData]) => {
         clearTimeout(timer);
         setOfferings(data);
+        setCatalogs(catalogsData);
+        setTerms(termsData);
+        setEmployees(employeesData);
+        setRooms(roomsData);
       })
       .catch((err) => {
         if (err instanceof Error) {
@@ -125,20 +142,44 @@ export const CourseOfferingsDataGrid = () => {
   const columnDefs = useMemo<ColDef<CourseOffering>[]>(() => {
     return [
       {
-        headerName: "Catalog ID",
+        headerName: "Course",
         field: "catalog_id",
-        width: 120,
+        flex: 2,
+        valueGetter: (params) => {
+          if (!params.data) return "";
+          const c = catalogs.find((cat) => cat.id === params.data?.catalog_id);
+          return c ? `${c.code} - ${c.title}` : `Catalog #${params.data.catalog_id}`;
+        }
       },
       {
         field: "term_id",
-        headerName: "Term ID",
+        headerName: "Term",
         flex: 1,
+        valueGetter: (params) => {
+          if (!params.data) return "";
+          const t = terms.find((term) => term.id === params.data?.term_id);
+          return t ? t.name : `Term #${params.data.term_id}`;
+        }
       },
       {
-        headerName: "Instructor ID",
+        headerName: "Instructor",
         field: "primary_instructor_id",
+        width: 150,
+        valueGetter: (params) => {
+          if (!params.data) return "";
+          const e = employees.find((emp) => emp.id === params.data?.primary_instructor_id);
+          return e ? `${e.first_name} ${e.last_name}` : "TBD";
+        }
+      },
+      {
+        headerName: "Room",
+        field: "room_id",
         width: 130,
-        valueFormatter: (params) => params.value ? params.value.toString() : "TBD",
+        valueGetter: (params) => {
+          if (!params.data || !params.data.room_id) return "N/A";
+          const r = rooms.find((rm) => rm.id === params.data?.room_id);
+          return r ? `${r.room_number}` : `Room #${params.data.room_id}`;
+        }
       },
       {
         headerName: "Schedule",
