@@ -24,6 +24,7 @@ export const getStudentPrograms = async (
           limit: params?.limit ?? 100,
         },
       },
+      cache: "no-store",
     });
 
     if (error) {
@@ -126,7 +127,7 @@ export const getStudentsList = async (): Promise<Student[]> => {
   try {
     const { data, error } = await apiClient.GET("/api/v1/students/", {
       params: {
-        query: { skip: 0, limit: 1000 },
+        query: { skip: 0, limit: 100 },
       },
     });
 
