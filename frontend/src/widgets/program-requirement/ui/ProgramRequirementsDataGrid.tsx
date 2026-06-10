@@ -14,6 +14,7 @@ import { Plus } from "lucide-react";
 import type { components } from "@/shared/api/schema";
 
 import { type CourseCatalog } from "@/entities/course-catalog";
+import { type Term } from "@/entities/terms";
 
 type DegreeProgram = components["schemas"]["DegreeProgramRead"];
 
@@ -26,6 +27,7 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
   const [requirements, setRequirements] = useState<ProgramRequirement[]>([]);
   const [programs, setPrograms] = useState<DegreeProgram[]>([]);
   const [courses, setCourses] = useState<CourseCatalog[]>([]);
+  const [terms, setTerms] = useState<Term[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,11 +47,13 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
   useEffect(() => {
     Promise.all([
       import("@/entities/degree-program/api/api").then((mod) => mod.getDegreePrograms({ limit: 100 })),
-      import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 100 }))
+      import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 100 })),
+      import("@/entities/terms/api/api").then((mod) => mod.getTerms())
     ])
-      .then(([programsData, coursesData]) => {
+      .then(([programsData, coursesData, termsData]) => {
         setPrograms(programsData);
         setCourses(coursesData);
+        setTerms(termsData);
       })
       .catch((err: unknown) => {
         console.error("Failed to load reference data for grid:", err);
@@ -167,7 +171,12 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
         headerName: "Rec. Semester",
         field: "semester_recommended",
         flex: 1,
-        valueFormatter: (params) => params.value ? `Semester ${params.value}` : "None",
+        valueGetter: (params) => {
+          const data = params.data;
+          if (!data?.semester_recommended) return "None";
+          const term = terms.find((t) => t.id === data.semester_recommended);
+          return term ? term.name : `Term #${data.semester_recommended}`;
+        },
       },
     ];
 

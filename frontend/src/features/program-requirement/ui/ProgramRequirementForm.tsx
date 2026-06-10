@@ -9,6 +9,7 @@ import {
 import type { components } from "@/shared/api/schema";
 
 import { type CourseCatalog } from "@/entities/course-catalog";
+import { type Term } from "@/entities/terms";
 
 type DegreeProgram = components["schemas"]["DegreeProgramRead"];
 
@@ -27,6 +28,7 @@ export const ProgramRequirementForm = ({ isOpen, onClose, requirement, onSubmitS
   // Dropdown data
   const [programs, setPrograms] = useState<DegreeProgram[]>([]);
   const [courses, setCourses] = useState<CourseCatalog[]>([]);
+  const [terms, setTerms] = useState<Term[]>([]);
 
   // Form Fields State
   const [programId, setProgramId] = useState<number | "">("");
@@ -39,11 +41,13 @@ export const ProgramRequirementForm = ({ isOpen, onClose, requirement, onSubmitS
     if (isOpen) {
       Promise.all([
         import("@/entities/degree-program/api/api").then((mod) => mod.getDegreePrograms({ limit: 100 })),
-        import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 100 }))
+        import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 100 })),
+        import("@/entities/terms/api/api").then((mod) => mod.getTerms())
       ])
-        .then(([programsData, coursesData]) => {
+        .then(([programsData, coursesData, termsData]) => {
           setPrograms(programsData);
           setCourses(coursesData);
+          setTerms(termsData);
         })
         .catch(console.error);
     }
@@ -184,15 +188,18 @@ export const ProgramRequirementForm = ({ isOpen, onClose, requirement, onSubmitS
 
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1.5">Semester Recommended</label>
-              <input
-                type="number"
-                min={1}
-                max={20}
+              <select
                 value={semesterRecommended}
                 onChange={(e) => setSemesterRecommended(e.target.value === "" ? "" : Number(e.target.value))}
-                className="w-full px-3 py-2.5 text-sm rounded-md border border-neutral-200 bg-white text-neutral-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-                placeholder="e.g. 1"
-              />
+                className="w-full px-3 py-2.5 text-sm rounded-md border border-neutral-200 bg-white text-neutral-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black appearance-none"
+              >
+                <option value="">None</option>
+                {terms.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </form>
