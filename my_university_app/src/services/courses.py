@@ -136,7 +136,11 @@ class EnrollmentService:
         return session.exec(statement).all()
 
     def get(self, session: Session, student_id: int, offering_id: int) -> Enrollment:
-        obj = enrollment_repository.get(session=session, student_id=student_id, offering_id=offering_id)
+        obj = enrollment_repository.get(
+            session=session, 
+            student_id=student_id, 
+            offering_id=offering_id
+        )
         if not obj:
             raise EntityNotFoundError("Enrollment", f"{student_id}-{offering_id}")
         return obj
@@ -150,13 +154,27 @@ class EnrollmentService:
         with UnitOfWork(session):
             db_obj = self.get(session=session, student_id=student_id, offering_id=offering_id)
             
-            # Soft delete для записей: меняем статус (например, на Dropped/Cancelled)
-            # Убедись, что EnrollmentStatus.Dropped существует в твоем Enum
+            # 1. Проверка идемпотентности: если уже отменен, ничего не делаем
+            if db_obj.status == EnrollmentStatus.Dropped:
+                return {"Success": "Enrollment is already cancelled."}
+            
+            # 2. Формируем данные для обновления (Soft Delete)
+            # Если твой репозиторий принимает словари:
+            update_data = {
+                "status": EnrollmentStatus.Dropped,
+                "grade": None,            # Очищаем оценку
+                "credits_earned": None    # Очищаем кредиты
+            }
+            
+            # Если репозиторий требует строго EnrollmentUpdate:
+            # update_data = EnrollmentUpdate(status=EnrollmentStatus.Dropped, grade=None, credits_earned=None)
+            
             enrollment_repository.update(
                 session=session, 
                 db_obj=db_obj, 
-                obj_in={"status": EnrollmentStatus.Dropped}
+                obj_in=update_data
             )
+            
             return {"Success": "Enrollment cancelled (Soft Deleted)"}
 
     def register_student(self, session: Session, student_id: int, offering_id: int) -> Enrollment:
