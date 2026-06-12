@@ -26,7 +26,7 @@ def get_students(
     advisor_id: Optional[int] = Query(None),
     is_active: Optional[bool] = Query(None),
     skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=10000),
 ):
     return student_service.get_all(
         session=session, q=q, region=region, advisor_id=advisor_id, is_active=is_active, skip=skip, limit=limit

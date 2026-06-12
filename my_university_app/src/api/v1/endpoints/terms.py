@@ -19,7 +19,7 @@ def get_academic_terms(
     current_user: CurrentUserDep, 
     is_active: Optional[bool] = Query(None), # <-- Добавить сюда
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return academic_term_service.get_all(
         session=session, 

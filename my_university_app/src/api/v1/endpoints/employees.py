@@ -41,7 +41,7 @@ def get_employees(
     region: Optional[str] = Query(None),
     is_active: Optional[bool] = Query(None),
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     employees = employee_service.get_all(
         session=session, q=q, department_id=department_id, role_id=role_id, region=region, is_active=is_active, skip=skip, limit=limit
@@ -96,7 +96,7 @@ def get_experiences(
     session: SessionDep, 
     current_user: CurrentUserDep,
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return employee_experience_service.get_all(session=session, skip=skip, limit=limit)
 

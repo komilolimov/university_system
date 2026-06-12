@@ -26,7 +26,7 @@ def get_departments(
     q: Optional[str] = Query(None, description="Search by name"),
     school_id: Optional[int] = Query(None),
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return department_service.get_all(session=session, q=q, school_id=school_id, skip=skip, limit=limit)
 
@@ -57,7 +57,7 @@ def get_schools(
     session: SessionDep, 
     current_user: CurrentUserDep, 
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return school_service.get_all(session=session, skip=skip, limit=limit)
 
@@ -88,7 +88,7 @@ def get_research_labs(
     session: SessionDep, 
     current_user: CurrentUserDep, 
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return research_lab_service.get_all(session=session, skip=skip, limit=limit)
 

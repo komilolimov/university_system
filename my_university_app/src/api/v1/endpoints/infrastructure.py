@@ -23,7 +23,7 @@ def get_buildings(
     session: SessionDep, 
     current_user: CurrentUserDep, 
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return building_service.get_all(session=session, skip=skip, limit=limit)
 
@@ -60,7 +60,7 @@ def get_rooms(
     building_id: Optional[int] = Query(None),
     type: Optional[str] = Query(None),
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return room_service.get_all(session=session, q=q, building_id=building_id, type=type, skip=skip, limit=limit)
 

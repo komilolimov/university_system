@@ -23,7 +23,7 @@ def get_degree_programs(
     session: SessionDep, 
     current_user: CurrentUserDep, 
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return degree_program_service.get_all(session=session, skip=skip, limit=limit)
 
@@ -57,7 +57,7 @@ def get_program_requirements(
     session: SessionDep, 
     current_user: CurrentUserDep, 
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return program_requirement_service.get_all(session=session, skip=skip, limit=limit)
 

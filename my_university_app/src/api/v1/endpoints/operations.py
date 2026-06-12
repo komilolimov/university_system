@@ -17,7 +17,7 @@ def get_student_programs(
     session: SessionDep, 
     current_user: CurrentUserDep, 
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return student_program_service.get_all(session=session, skip=skip, limit=limit)
 

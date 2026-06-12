@@ -30,7 +30,7 @@ def get_course_catalog_entries(
     credits: Optional[int] = Query(None),
     is_active: Optional[bool] = Query(None),
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return course_catalog_service.get_all(
         session=session, q=q, department_id=department_id, credits=credits, is_active=is_active, skip=skip, limit=limit
@@ -70,7 +70,7 @@ def get_course_offerings(
     primary_instructor_id: Optional[int] = Query(None),
     room_id: Optional[int] = Query(None),
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=10000),
     is_active: Optional[bool] = Query(None),
 ):
     return course_offering_service.get_all(
@@ -110,7 +110,7 @@ def get_enrollments(
     offering_id: Optional[int] = Query(None),
     status: Optional[EnrollmentStatus] = Query(None),
     skip: int = Query(0, ge=0), 
-    limit: int = Query(100, ge=1, le=100)
+    limit: int = Query(100, ge=1, le=10000)
 ):
     return enrollment_service.get_all(
         session=session, student_id=student_id, offering_id=offering_id, status=status, skip=skip, limit=limit
