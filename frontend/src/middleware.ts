@@ -2,12 +2,26 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const protectedRoutes = [
-  "/dashboard", 
-  "/students", 
-  "/courses", 
-  "/employees", 
+  "/buildings",
+  "/course-catalog",
+  "/course-offerings",
+  "/dashboard",
+  "/degree-programs",
+  "/departments",
+  "/documents",
+  "/employee-experience",
+  "/employees",
   "/enrollments",
-  "student-programs",
+  "/permissions",
+  "/profile",
+  "/program-requirements",
+  "/research-labs",
+  "/roles",
+  "/rooms",
+  "/schools",
+  "/student-programs",
+  "/students",
+  "/terms"
 ];
 const authRoutes = ["/login", "/register"];
 
