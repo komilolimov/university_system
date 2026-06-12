@@ -8,12 +8,16 @@ import type { Term, TermCreate, TermUpdate } from "../model/types";
 export interface GetTermsParams {
   q?: string | null;
   is_active?: boolean | null;
+  limit?: number;
+  skip?: number;
 }
 
 export const getTerms = async (params: GetTermsParams = {}): Promise<Term[]> => {
   const query: Record<string, string | number | boolean> = {};
   if (params.q !== undefined && params.q !== null) query.q = params.q;
   if (params.is_active !== undefined && params.is_active !== null) query.is_active = params.is_active;
+  if (params.limit !== undefined) query.limit = params.limit;
+  if (params.skip !== undefined) query.skip = params.skip;
 
   try {
     const { data, error } = await apiClient.GET("/api/v1/academic-terms/", {

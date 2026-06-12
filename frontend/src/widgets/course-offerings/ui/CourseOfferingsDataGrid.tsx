@@ -49,11 +49,11 @@ export const CourseOfferingsDataGrid = () => {
     if (status === "inactive") isActiveParam = false;
     
     Promise.all([
-      getCourseOfferings({ is_active: isActiveParam }),
-      getCourseCatalogs({ limit: 100 }),
-      getTerms(),
-      getEmployees({ limit: 100 }),
-      getRooms({ limit: 100 })
+      getCourseOfferings({ is_active: isActiveParam, limit: 1000 }),
+      getCourseCatalogs({ limit: 1000 }),
+      getTerms({ limit: 1000 }),
+      getEmployees({ limit: 1000 }),
+      getRooms({ limit: 1000 })
     ])
       .then(([data, catalogsData, termsData, employeesData, roomsData]) => {
         clearTimeout(timer);

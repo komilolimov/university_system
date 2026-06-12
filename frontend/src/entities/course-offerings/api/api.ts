@@ -7,6 +7,8 @@ import type { CourseOffering, CourseOfferingCreate, CourseOfferingUpdate } from 
 
 export interface GetCourseOfferingsParams {
   is_active?: boolean | null;
+  limit?: number;
+  skip?: number;
 }
 
 export const getCourseOfferings = async (params: GetCourseOfferingsParams = {}): Promise<CourseOffering[]> => {
@@ -14,6 +16,8 @@ export const getCourseOfferings = async (params: GetCourseOfferingsParams = {}):
   if (params.is_active !== null && params.is_active !== undefined) {
     query.is_active = params.is_active;
   }
+  if (params.limit !== undefined) query.limit = params.limit;
+  if (params.skip !== undefined) query.skip = params.skip;
 
   try {
     const { data, error } = await apiClient.GET("/api/v1/course-offerings/", {
