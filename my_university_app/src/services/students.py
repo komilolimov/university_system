@@ -48,13 +48,19 @@ class StudentService:
         with UnitOfWork(session):
             create_data = obj_in.model_dump(exclude={"password"})
             create_data["hashed_password"] = get_password_hash(obj_in.password)
-            return student_repository.create(session=session, obj_in=create_data)
+            new_student = student_repository.create(session=session, obj_in=create_data)
+        
+        session.refresh(new_student)
+        return new_student
 
     def update(self, session: Session, id: int, obj_in: StudentUpdate) -> Student:
         with UnitOfWork(session):
             db_obj = self.get(session=session, id=id)
             update_data = obj_in.model_dump(exclude_unset=True)
-            return student_repository.update(session=session, db_obj=db_obj, obj_in=update_data)
+            updated_student = student_repository.update(session=session, db_obj=db_obj, obj_in=update_data)
+
+        session.refresh(updated_student)
+        return updated_student
 
     def change_password(self, session: Session, id: int, obj_in: ChangePasswordRequest) -> None:
         with UnitOfWork(session):

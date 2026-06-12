@@ -72,7 +72,11 @@ class EmployeeService:
             create_data["hashed_password"] = get_password_hash(obj_in.password)
             
             # 3. Передаем готовый словарь в репозиторий
-            return employee_repository.create(session=session, obj_in=create_data)
+            new_employee = employee_repository.create(session=session, obj_in=create_data)
+
+        # Обязательно делаем refresh, чтобы загрузить данные (связи)
+        session.refresh(new_employee)
+        return new_employee
 
     def update(self, session: Session, id: int, obj_in: EmployeeUpdate) -> Employee:
         with UnitOfWork(session):
@@ -142,7 +146,10 @@ class EmployeeExperienceService:
             create_data = obj_in.model_dump()
             create_data["employee_id"] = employee_id
             
-            return employee_experience_repository.create(session=session, obj_in=create_data)
+            new_exp = employee_experience_repository.create(session=session, obj_in=create_data)
+
+        session.refresh(new_exp)
+        return new_exp
 
     def update(self, session: Session, id: int, obj_in: EmployeeExperienceUpdate) -> EmployeeExperience:
         with UnitOfWork(session):
