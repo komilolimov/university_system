@@ -109,7 +109,7 @@ export const getDegreePrograms = async (): Promise<DegreeProgram[]> => {
   try {
     const { data, error } = await apiClient.GET("/api/v1/degree-programs/", {
       params: {
-        query: { skip: 0, limit: 100 },
+        query: { skip: 0, limit: 1000 },
       },
     });
 
@@ -127,7 +127,7 @@ export const getStudentsList = async (): Promise<Student[]> => {
   try {
     const { data, error } = await apiClient.GET("/api/v1/students/", {
       params: {
-        query: { skip: 0, limit: 100 },
+        query: { skip: 0, limit: 1000 },
       },
     });
 

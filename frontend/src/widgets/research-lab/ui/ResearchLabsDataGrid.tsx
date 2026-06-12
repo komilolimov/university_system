@@ -40,7 +40,7 @@ export const ResearchLabsDataGrid = ({ canMutate = true }: ResearchLabsDataGridP
   // Load departments for grid rendering
   useEffect(() => {
     import("@/entities/department/api/api").then(({ getDepartments }) => {
-      getDepartments({ limit: 100 })
+      getDepartments({ limit: 1000 })
         .then((data) => {
           setDepartments(data);
         })
@@ -57,7 +57,7 @@ export const ResearchLabsDataGrid = ({ canMutate = true }: ResearchLabsDataGridP
     
     getResearchLabs({
       q: debouncedSearch.trim() || null,
-      limit: 100 
+      limit: 1000 
     })
       .then((data) => {
         clearTimeout(timer);

@@ -38,7 +38,7 @@ export const CourseCatalogDataGrid = () => {
     setLoading(true);
     const isActiveParam = status === "active" ? true : status === "inactive" ? false : undefined;
     
-    getCourseCatalogs({ is_active: isActiveParam, q: searchStr, limit: 100 })
+    getCourseCatalogs({ is_active: isActiveParam, q: searchStr, limit: 1000 })
       .then((data) => {
         setCourses(data);
       })

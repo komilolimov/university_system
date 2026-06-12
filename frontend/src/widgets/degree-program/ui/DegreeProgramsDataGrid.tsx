@@ -40,7 +40,7 @@ export const DegreeProgramsDataGrid = ({ canMutate = true }: DegreeProgramsDataG
   // Load departments for grid rendering
   useEffect(() => {
     import("@/entities/department/api/api").then(({ getDepartments }) => {
-      getDepartments({ limit: 100 })
+      getDepartments({ limit: 1000 })
         .then((data) => {
           setDepartments(data);
         })
@@ -57,7 +57,7 @@ export const DegreeProgramsDataGrid = ({ canMutate = true }: DegreeProgramsDataG
     
     getDegreePrograms({
       q: debouncedSearch.trim() || null,
-      limit: 100 
+      limit: 1000 
     })
       .then((data) => {
         clearTimeout(timer);

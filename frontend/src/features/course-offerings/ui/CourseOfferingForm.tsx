@@ -49,10 +49,10 @@ export const CourseOfferingForm = ({
   useEffect(() => {
     if (isOpen) {
       Promise.all([
-        getCourseCatalogs({ limit: 100 }),
+        getCourseCatalogs({ limit: 1000 }),
         getTerms(),
-        getEmployees({ limit: 100 }),
-        getRooms({ limit: 100 })
+        getEmployees({ limit: 1000 }),
+        getRooms({ limit: 1000 })
       ]).then(([catalogsData, termsData, employeesData, roomsData]) => {
         setCatalogs(catalogsData);
         setTerms(termsData);

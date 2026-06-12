@@ -46,8 +46,8 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
   // Load programs and courses for grid rendering
   useEffect(() => {
     Promise.all([
-      import("@/entities/degree-program/api/api").then((mod) => mod.getDegreePrograms({ limit: 100 })),
-      import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 100 })),
+      import("@/entities/degree-program/api/api").then((mod) => mod.getDegreePrograms({ limit: 1000 })),
+      import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 1000 })),
       import("@/entities/terms/api/api").then((mod) => mod.getTerms())
     ])
       .then(([programsData, coursesData, termsData]) => {
@@ -67,7 +67,7 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
     
     getProgramRequirements({
       q: debouncedSearch.trim() || null,
-      limit: 100 
+      limit: 1000 
     })
       .then((data) => {
         clearTimeout(timer);

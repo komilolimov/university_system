@@ -33,7 +33,7 @@ export const ResearchLabForm = ({ isOpen, onClose, lab, onSubmitSuccess }: Resea
   useEffect(() => {
     if (isOpen) {
       import("@/entities/department/api/api").then(({ getDepartments }) => {
-        getDepartments({ limit: 100 })
+        getDepartments({ limit: 1000 })
           .then((data) => {
             setDepartments(data);
           })

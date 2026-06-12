@@ -47,9 +47,9 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
   // Load programs and courses for grid rendering
   useEffect(() => {
     Promise.all([
-      import("@/entities/student/api/api").then((mod) => mod.getStudents({ limit: 100 })),
+      import("@/entities/student/api/api").then((mod) => mod.getStudents({ limit: 1000 })),
       import("@/entities/course-offerings/api/api").then((mod) => mod.getCourseOfferings()),
-      import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 100 }))
+      import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 1000 }))
     ])
       .then(([studentsData, offeringsData, catalogsData]) => {
         setStudents(studentsData);
@@ -70,7 +70,7 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
     // But we can filter by status. For search query, we will filter locally.
     getEnrollments({
       status: statusFilter || null,
-      limit: 100 
+      limit: 1000 
     })
       .then((data) => {
         clearTimeout(timer);

@@ -42,9 +42,9 @@ export const EnrollmentForm = ({ isOpen, onClose, enrollment, onSubmitSuccess }:
   useEffect(() => {
     if (isOpen) {
       Promise.all([
-        import("@/entities/student/api/api").then((mod) => mod.getStudents({ limit: 100 })),
+        import("@/entities/student/api/api").then((mod) => mod.getStudents({ limit: 1000 })),
         import("@/entities/course-offerings/api/api").then((mod) => mod.getCourseOfferings()),
-        import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 100 }))
+        import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 1000 }))
       ])
         .then(([studentsData, offeringsData, catalogsData]) => {
           setStudents(studentsData);

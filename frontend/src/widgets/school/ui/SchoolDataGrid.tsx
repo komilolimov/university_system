@@ -40,7 +40,7 @@ export const SchoolDataGrid = ({ canMutate = true }: SchoolDataGridProps) => {
     
     getSchools({
       q: debouncedSearch.trim() || null,
-      limit: 100 
+      limit: 1000 
     })
       .then((data) => {
         clearTimeout(timer);

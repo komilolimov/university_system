@@ -40,8 +40,8 @@ export const ProgramRequirementForm = ({ isOpen, onClose, requirement, onSubmitS
   useEffect(() => {
     if (isOpen) {
       Promise.all([
-        import("@/entities/degree-program/api/api").then((mod) => mod.getDegreePrograms({ limit: 100 })),
-        import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 100 })),
+        import("@/entities/degree-program/api/api").then((mod) => mod.getDegreePrograms({ limit: 1000 })),
+        import("@/entities/course-catalog/api/api").then((mod) => mod.getCourseCatalogs({ limit: 1000 })),
         import("@/entities/terms/api/api").then((mod) => mod.getTerms())
       ])
         .then(([programsData, coursesData, termsData]) => {

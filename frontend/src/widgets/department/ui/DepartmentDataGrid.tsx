@@ -58,7 +58,7 @@ export const DepartmentDataGrid = ({ canMutate = true }: DepartmentDataGridProps
     
     getDepartments({
       q: debouncedSearch.trim() || null,
-      limit: 100 
+      limit: 1000 
     })
       .then((data) => {
         clearTimeout(timer);
