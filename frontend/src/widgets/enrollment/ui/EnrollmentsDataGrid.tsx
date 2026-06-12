@@ -4,11 +4,11 @@ import { useState, useEffect, useMemo, useTransition } from "react";
 import { DataGrid } from "@/shared/ui";
 import { 
   getEnrollments, 
-  deleteEnrollment, 
+  updateEnrollment, 
   type Enrollment,
   type EnrollmentStatus
 } from "@/entities/enrollment";
-import { ActionCellRenderer, EnrollmentFiltersToolbar, EnrollmentForm } from "@/features/enrollment";
+import { ActionCellRenderer, EnrollmentFiltersToolbar, EnrollmentForm, StatusCellRenderer } from "@/features/enrollment";
 import type { ColDef } from "ag-grid-community";
 import { toast } from "@/shared/lib/toast";
 import { Plus } from "lucide-react";
@@ -115,48 +115,31 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
     setIsFormOpen(true);
   };
 
-  const executeDelete = async (req: Enrollment) => {
-    const toastId = toast.loading("Deleting enrollment...", "This might take a second.");
+  const handleChangeStatus = async (req: Enrollment, newStatus: EnrollmentStatus) => {
+    const toastId = toast.loading("Updating status...", "Saving changes.");
     
     try {
-      await deleteEnrollment(req.student_id, req.offering_id);
+      await updateEnrollment(req.student_id, req.offering_id, {
+        status: newStatus,
+        grade: newStatus === "Dropped" ? null : req.grade,
+        credits_earned: newStatus === "Dropped" ? null : req.credits_earned
+      });
       fetchRecords();
       toast.dismiss(toastId);
-      toast.success(
-        "Enrollment deleted",
-        "The enrollment has been successfully deleted."
-      );
+      toast.success("Status updated", `Enrollment status changed to ${newStatus}.`);
     } catch (err: unknown) {
       toast.dismiss(toastId);
       if (err instanceof Error) {
-        toast.error(
-          "Failed to delete enrollment",
-          err.message
-        );
+        toast.error("Failed to update status", err.message);
       } else {
-        toast.error(
-          "Error",
-          "Unexpected error occurred."
-        );
+        toast.error("Error", "Unexpected error occurred.");
       }
     }
   };
 
-  const handleDelete = (req: Enrollment) => {
-    toast.confirm(
-      "Delete Enrollment",
-      "Are you sure you want to delete this enrollment? This action cannot be undone.",
-      () => {
-        startTransition(() => {
-          executeDelete(req);
-        });
-      }
-    );
-  };
-
   const gridContext = useMemo(() => ({
     onEdit: handleEdit,
-    onDelete: handleDelete,
+    onChangeStatus: handleChangeStatus,
   }), [enrollments]);
 
   const columnDefs = useMemo<ColDef<Enrollment>[]>(() => {
@@ -185,7 +168,8 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
       {
         headerName: "Status",
         field: "status",
-        width: 130,
+        width: 150,
+        cellRenderer: canMutate ? StatusCellRenderer : undefined,
       },
       {
         headerName: "Grade",

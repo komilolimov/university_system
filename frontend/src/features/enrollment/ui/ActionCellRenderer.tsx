@@ -36,14 +36,6 @@ export const ActionCellRenderer = (
       >
         Edit
       </button>
-
-      <button
-        onClick={handleDelete}
-        disabled={isPending}
-        className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-red-600 hover:text-red-700 hover:bg-red-50/50 hover:border-red-100 active:bg-red-100 transition-colors cursor-pointer select-none disabled:opacity-50"
-      >
-        {isPending ? "..." : "Delete"}
-      </button>
     </div>
   );
 };

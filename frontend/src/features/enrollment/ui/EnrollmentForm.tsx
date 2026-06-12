@@ -205,11 +205,14 @@ export const EnrollmentForm = ({ isOpen, onClose, enrollment, onSubmitSuccess }:
             <div>
               <label className="block text-xs font-medium text-neutral-500 mb-1.5">Grade</label>
               <input
-                type="text"
+                type="number"
+                min={0}
+                max={4.00}
+                step={0.01}
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
                 className="w-full px-3 py-2.5 text-sm rounded-md border border-neutral-200 bg-white text-neutral-900 focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-                placeholder="e.g. A, B+, 95"
+                placeholder="e.g. 3.50"
               />
             </div>
 

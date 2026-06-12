@@ -44,18 +44,20 @@ export const EnrollmentFiltersToolbar: React.FC<
       </div>
       
       {/* Status Filter */}
-      <div className="w-full md:w-48">
-        <select
-          value={statusFilter}
-          onChange={(e) => onStatusFilterChange(e.target.value as EnrollmentStatus | "")}
-          className="block w-full px-3 py-1.5 text-sm font-medium border border-neutral-200 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-colors text-black bg-white appearance-none"
-        >
-          <option value="">All Statuses</option>
-          <option value="Enrolled">Enrolled</option>
-          <option value="Waitlisted">Waitlisted</option>
-          <option value="Dropped">Dropped</option>
-          <option value="Completed">Completed</option>
-        </select>
+      <div className="flex bg-neutral-100 p-0.5 rounded-md border border-neutral-200">
+        {(["", "Enrolled", "Waitlisted", "Completed", "Dropped"] as const).map((status) => (
+          <button
+            key={status}
+            onClick={() => onStatusFilterChange(status as EnrollmentStatus | "")}
+            className={`px-3 py-1 text-xs font-semibold rounded-sm transition-colors ${
+              statusFilter === status
+                ? "bg-white text-black shadow-sm"
+                : "text-neutral-500 hover:text-neutral-700"
+            }`}
+          >
+            {status === "" ? "All" : status}
+          </button>
+        ))}
       </div>
 
       {hasActiveFilters && (
