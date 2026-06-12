@@ -1,3 +1,4 @@
+import { toast } from "@/shared/lib/toast";
 import React, { useState, useEffect } from "react";
 import type { Document, DocumentCreate, OwnerType, DocumentType, DocumentStatus } from "@/entities/documents";
 

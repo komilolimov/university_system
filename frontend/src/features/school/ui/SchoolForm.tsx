@@ -14,6 +14,8 @@ interface SchoolFormProps {
   onSubmitSuccess: () => void;
 }
 
+import { toast } from "@/shared/lib/toast";
+
 export const SchoolForm = ({ isOpen, onClose, school, onSubmitSuccess }: SchoolFormProps) => {
   const isEditMode = !!school;
   const [isPending, startTransition] = useTransition();
@@ -54,10 +56,12 @@ export const SchoolForm = ({ isOpen, onClose, school, onSubmitSuccess }: SchoolF
           await updateSchool(school.id, {
             name: name.trim(),
           });
+          toast.success("School updated", "The school details have been successfully updated.");
         } else {
           await createSchool({
             name: name.trim(),
           });
+          toast.success("School created", "A new school has been successfully added.");
         }
         
         onSubmitSuccess();

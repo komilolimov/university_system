@@ -1,4 +1,5 @@
 "use client";
+import { toast } from "@/shared/lib/toast";
 
 import React, { useState, useEffect, useTransition } from "react";
 import { 
@@ -84,6 +85,7 @@ export const ResearchLabForm = ({ isOpen, onClose, lab, onSubmitSuccess }: Resea
           });
         }
         
+        toast.success("Success", "The record has been saved successfully.");
         onSubmitSuccess();
         onClose();
       } catch (err: unknown) {

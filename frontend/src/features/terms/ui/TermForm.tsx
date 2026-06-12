@@ -73,6 +73,7 @@ export const TermForm = ({ isOpen, onClose, term, onSubmitSuccess }: TermFormPro
           await createTerm(formData);
         }
 
+        toast.success("Success", "The record has been saved successfully.");
         onSubmitSuccess();
         onClose();
       } catch (err: unknown) {

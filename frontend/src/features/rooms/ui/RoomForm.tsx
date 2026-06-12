@@ -1,3 +1,4 @@
+import { toast } from "@/shared/lib/toast";
 import React, { useState, useEffect } from "react";
 import type { Room, RoomCreate, RoomType } from "@/entities/rooms";
 import { getBuildings, type Building } from "@/entities/buildings";
