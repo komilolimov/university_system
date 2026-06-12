@@ -21,7 +21,7 @@ export const getStudentPrograms = async (
       params: {
         query: {
           skip: params?.skip ?? 0,
-          limit: params?.limit ?? 100,
+          limit: params?.limit ?? 1000,
         },
       },
       cache: "no-store",

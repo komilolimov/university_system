@@ -22,7 +22,7 @@ export const getStudents = async (params: GetStudentsParams = {}) => {
   if (params.advisor_id !== null && params.advisor_id !== undefined) query.advisor_id = params.advisor_id;
   if (params.is_active !== null && params.is_active !== undefined) query.is_active = params.is_active;
   if (params.skip !== undefined) query.skip = params.skip;
-  if (params.limit !== undefined) query.limit = params.limit;
+  query.limit = params.limit !== undefined ? params.limit : 1000;
 
   try {
     const { data, error } = await apiClient.GET("/api/v1/students/", {

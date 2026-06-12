@@ -16,7 +16,7 @@ export const getEmployeeExperiences = async (
 ): Promise<EmployeeExperience[]> => {
   const query: Record<string, string | number | boolean> = {};
   if (params.skip !== undefined) query.skip = params.skip;
-  if (params.limit !== undefined) query.limit = params.limit;
+  query.limit = params.limit !== undefined ? params.limit : 1000;
 
   try {
     const { data, error } = await apiClient.GET("/api/v1/employee-experiences/", {

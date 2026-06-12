@@ -16,7 +16,7 @@ export const getCourseOfferings = async (params: GetCourseOfferingsParams = {}):
   if (params.is_active !== null && params.is_active !== undefined) {
     query.is_active = params.is_active;
   }
-  if (params.limit !== undefined) query.limit = params.limit;
+  query.limit = params.limit !== undefined ? params.limit : 1000;
   if (params.skip !== undefined) query.skip = params.skip;
 
   try {

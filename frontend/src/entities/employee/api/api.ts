@@ -14,7 +14,7 @@ export const getEmployees = async (params: GetEmployeesParams = {}): Promise<Emp
   if (params.region) query.region = params.region;
   if (params.is_active !== null && params.is_active !== undefined) query.is_active = params.is_active;
   if (params.skip !== undefined) query.skip = params.skip;
-  if (params.limit !== undefined) query.limit = params.limit;
+  query.limit = params.limit !== undefined ? params.limit : 1000;
 
   try {
     const { data, error } = await apiClient.GET("/api/v1/employees/", {

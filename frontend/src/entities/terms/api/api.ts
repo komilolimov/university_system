@@ -16,7 +16,7 @@ export const getTerms = async (params: GetTermsParams = {}): Promise<Term[]> => 
   const query: Record<string, string | number | boolean> = {};
   if (params.q !== undefined && params.q !== null) query.q = params.q;
   if (params.is_active !== undefined && params.is_active !== null) query.is_active = params.is_active;
-  if (params.limit !== undefined) query.limit = params.limit;
+  query.limit = params.limit !== undefined ? params.limit : 1000;
   if (params.skip !== undefined) query.skip = params.skip;
 
   try {
