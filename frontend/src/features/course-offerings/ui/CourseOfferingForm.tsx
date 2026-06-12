@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { toast } from "@/shared/lib/toast";
+import { ScheduleInput } from "./ScheduleInput";
 import {
   createCourseOffering,
   updateCourseOffering,
@@ -192,11 +193,9 @@ export const CourseOfferingForm = ({
             {/* Schedule Blocks */}
             <div className="col-span-2">
               <label className="block text-xs font-medium text-neutral-500 mb-1.5">Schedule</label>
-              <input
-                type="datetime-local"
+              <ScheduleInput 
                 value={formData.schedule_blocks || ""}
-                onChange={(e) => setFormData({ ...formData, schedule_blocks: e.target.value })}
-                className={inputClassName}
+                onChange={(val) => setFormData({ ...formData, schedule_blocks: val })}
               />
             </div>
             <div>
