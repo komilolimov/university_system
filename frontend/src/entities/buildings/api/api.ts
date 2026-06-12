@@ -13,7 +13,7 @@ export interface GetBuildingsParams {
 export const getBuildings = async (params: GetBuildingsParams = {}): Promise<Building[]> => {
   const query: Record<string, number> = {};
   if (params.skip !== undefined) query.skip = params.skip;
-  query.limit = params.limit !== undefined ? params.limit : 100;
+  query.limit = params.limit !== undefined ? params.limit : 1000;
 
   try {
     const { data, error } = await apiClient.GET("/api/v1/buildings/", {

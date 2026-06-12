@@ -13,7 +13,7 @@ export interface GetDocumentsParams {
 export const getDocuments = async (params: GetDocumentsParams = {}): Promise<Document[]> => {
   const query: Record<string, number> = {};
   if (params.skip !== undefined) query.skip = params.skip;
-  query.limit = params.limit !== undefined ? params.limit : 100;
+  query.limit = params.limit !== undefined ? params.limit : 1000;
 
   try {
     // Note: This endpoint must exist on the backend exactly as /api/v1/documents/
