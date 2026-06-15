@@ -13,13 +13,20 @@ export const EnrollmentList = async () => {
 
   if (!enrollments || enrollments.length === 0) {
     return (
-      <div className="flex flex-col gap-6 w-full">
-        <h2 className="text-2xl font-bold border-b border-gray-900 pb-2 uppercase tracking-widest text-gray-900">
-          My Enrollments
-        </h2>
-        <div className="border border-gray-200 p-8 flex flex-col gap-2 items-center justify-center min-h-[200px]">
-          <h3 className="text-xl font-bold text-gray-900">No active enrollments</h3>
-          <p className="text-gray-500 font-medium tracking-wide">You are not enrolled in any courses yet.</p>
+      <div className="flex flex-col gap-5 w-full select-none">
+        <div className="flex flex-col gap-1 border-b border-neutral-200/60 pb-4">
+          <h2 className="text-xl font-semibold tracking-tight text-neutral-900">
+            My Enrollments
+          </h2>
+          <p className="text-sm font-medium text-neutral-500">
+            Manage your course registrations
+          </p>
+        </div>
+        <div className="bg-neutral-50/50 border border-dashed border-neutral-200 rounded-xl p-8 flex flex-col gap-2 items-center justify-center min-h-[200px]">
+          <h3 className="text-[15px] font-semibold text-neutral-900">No active enrollments</h3>
+          <p className="text-sm text-neutral-500 font-medium text-center max-w-[250px]">
+            You are not enrolled in any courses yet. Visit the course catalog to register.
+          </p>
         </div>
       </div>
     );
@@ -42,11 +49,16 @@ export const EnrollmentList = async () => {
   );
 
   return (
-    <div className="flex flex-col gap-6 w-full">
-      <h2 className="text-2xl font-bold border-b border-gray-900 pb-2 uppercase tracking-widest text-gray-900">
-        My Enrollments
-      </h2>
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div className="flex flex-col gap-5 w-full select-none">
+      <div className="flex flex-col gap-1 border-b border-neutral-200/60 pb-4">
+        <h2 className="text-xl font-semibold tracking-tight text-neutral-900">
+          My Enrollments
+        </h2>
+        <p className="text-sm font-medium text-neutral-500">
+          Manage your course registrations
+        </p>
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {enrichedEnrollments.map(({ enrollment, offering, course }) => 
           (offering && course) ? (
             <EnrollmentCard key={enrollment.offering_id} enrollment={enrollment} offering={offering} course={course} />

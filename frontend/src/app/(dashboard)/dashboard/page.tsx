@@ -2,32 +2,43 @@ import React from "react";
 import { StudentProfileOverview } from "@/widgets/student-profile";
 import { EnrollmentList } from "@/widgets/my-enrollments";
 import { AdminOverview } from "@/widgets/admin-dashboard";
-import { OverviewStats } from "@/widgets/dashboard";
+import { OverviewStats, EnrollmentTrendsChart, RecentActivityFeed } from "@/widgets/dashboard";
 import { getJwtPayload } from "@/shared/auth/jwt";
 import { apiClient } from "@/shared/api/client";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const payload = await getJwtPayload();
   const role = payload?.role || "Student";
   const isAdminOrFaculty = role === "Admin" || role === "Faculty";
 
-  // Concurrent dynamic fetching for actual counts to fuel OverviewStats
-  const [coursesRes, studentsRes, enrollmentsRes, schoolsRes, meRes] = await Promise.all([
-    apiClient.GET("/api/v1/course-catalog/").catch(() => ({ data: [] })),
-    apiClient.GET("/api/v1/students/").catch(() => ({ data: [] })),
-    apiClient.GET("/api/v1/enrollments/").catch(() => ({ data: [] })),
-    apiClient.GET("/api/v1/schools/").catch(() => ({ data: [] })),
-    apiClient.GET("/api/v1/auth/me", {}).catch((err) => ({ data: null, error: err })),
-  ]);
+  // Interface for the new dashboard stats API (until OpenAPI is re-synced)
+  interface OverviewStatsType {
+    coursesCount: number;
+    studentsCount: number;
+    enrollmentsCount: number;
+    schoolsCount: number;
+    employeesCount: number;
+    activeProgramsCount: number;
+  }
 
-  console.log("🔥 ДАННЫЕ ПОЛЬЗОВАТЕЛЯ (/me):", meRes?.data);
+  // Fetch actual counts using the new lightweight statistics endpoint
+  // Use `as any` to bypass openapi-fetch strict path typing temporarily
+  const overviewRes = await apiClient.GET("/api/v1/dashboard/stats/overview" as any, {}).catch(() => ({ data: null }));
+  const trendsRes = await apiClient.GET("/api/v1/dashboard/stats/enrollment-trends" as any, {}).catch(() => ({ data: [] }));
+  const demoRes = await apiClient.GET("/api/v1/dashboard/stats/demographics" as any, {}).catch(() => ({ data: [] }));
 
-  const stats = {
-    coursesCount: coursesRes?.data?.length || 0,
-    studentsCount: studentsRes?.data?.length || 0,
-    enrollmentsCount: enrollmentsRes?.data?.length || 0,
-    schoolsCount: schoolsRes?.data?.length || 0,
+  const stats: OverviewStatsType = (overviewRes?.data as OverviewStatsType) || {
+    coursesCount: 0,
+    studentsCount: 0,
+    enrollmentsCount: 0,
+    schoolsCount: 0,
+    employeesCount: 0,
+    activeProgramsCount: 0
   };
+
+  const trendsData = (trendsRes?.data as any[]) || [];
 
   return (
     <main className="w-full flex flex-col gap-8 px-6 py-8 sm:px-10 font-sans">
@@ -47,19 +58,27 @@ export default async function DashboardPage() {
       </section>
 
       {/* Role-Based Panel Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {isAdminOrFaculty ? (
-          <section className="md:col-span-3">
-            <AdminOverview />
-          </section>
+          <>
+            <section className="lg:col-span-2 flex flex-col gap-8">
+              <EnrollmentTrendsChart data={trendsData} />
+              <AdminOverview />
+            </section>
+            <aside className="lg:col-span-1 flex flex-col gap-8">
+              <RecentActivityFeed />
+            </aside>
+          </>
         ) : (
           <>
-            <aside className="md:col-span-1">
-              <StudentProfileOverview />
-            </aside>
-            <section className="md:col-span-2">
+            <section className="lg:col-span-2 flex flex-col gap-8">
+              <EnrollmentTrendsChart data={trendsData} />
               <EnrollmentList />
             </section>
+            <aside className="lg:col-span-1 flex flex-col gap-8">
+              <StudentProfileOverview />
+              <RecentActivityFeed />
+            </aside>
           </>
         )}
       </div>

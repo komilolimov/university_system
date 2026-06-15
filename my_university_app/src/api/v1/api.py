@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.api.v1.endpoints import auth, permission, roles
+from src.api.v1.endpoints import auth, permission, roles, dashboard
 from src.api.v1.endpoints.students import router as students_router
 from src.api.v1.endpoints.employees import employee_router, experience_router
 from src.api.v1.endpoints.departments import department_router, school_router, research_lab_router
@@ -11,6 +11,9 @@ from src.api.v1.endpoints.operations import router as operations_router
 from src.api.v1.endpoints.documents import router as documents_router
 
 api_router = APIRouter(prefix="/api/v1")
+
+# Dashboard Stats
+api_router.include_router(dashboard.router)
 
 # Authentication & RBAC
 api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
