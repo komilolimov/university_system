@@ -17,10 +17,11 @@ import { toast } from "@/shared/lib/toast";
 import { Plus } from "lucide-react";
 
 interface StudentsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const StudentsDataGrid = ({ canMutate = true }: StudentsDataGridProps) => {
+export const StudentsDataGrid = ({ canWrite = true, canDelete = true }: StudentsDataGridProps) => {
 
   const [students, setStudents] = useState<Student[]>([]);
   const [advisors, setAdvisors] = useState<Employee[]>([]);
@@ -189,10 +190,12 @@ const handleActivate = (id: number) => {
 
   // Context passed to AG Grid cell renderers
   const gridContext = useMemo(() => ({
+    canEdit: canWrite,
+    canDelete: canDelete,
     onEdit: handleEdit,
     onDelete: handleDelete,
     onActivate: handleActivate,
-  }), [students]);
+  }), [students, canWrite, canDelete]);
 
   // Column definitions for AG Grid
 const columnDefs = useMemo<ColDef<Student>[]>(() => {
@@ -274,7 +277,7 @@ const columnDefs = useMemo<ColDef<Student>[]>(() => {
     },
   ];
 
-  if (canMutate) {
+  if (canWrite || canDelete) {
     cols.push({
       headerName: "Actions",
       flex: 1,
@@ -286,7 +289,7 @@ const columnDefs = useMemo<ColDef<Student>[]>(() => {
   }
 
   return cols;
-}, [advisors, canMutate]);
+}, [advisors, canWrite, canDelete]);
 
   // Open creation modal
   const handleAddNew = () => {
@@ -308,7 +311,7 @@ const columnDefs = useMemo<ColDef<Student>[]>(() => {
         </p>
       </div>
 
-      {canMutate && (
+      {canWrite && (
         <button
           onClick={handleAddNew}
           className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
@@ -341,12 +344,7 @@ const columnDefs = useMemo<ColDef<Student>[]>(() => {
         <DataGrid
           rowData={students}
           columnDefs={columnDefs}
-          context={{
-            canMutate,
-            onEdit: handleEdit,
-            onDelete: handleDelete,
-            onActivate: handleActivate,
-          }}
+          context={gridContext}
           height={600}
         />
       </div>

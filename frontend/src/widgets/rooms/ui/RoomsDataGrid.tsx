@@ -11,10 +11,11 @@ import { getBuildings, type Building } from "@/entities/buildings";
 import { ActionCellRenderer, RoomForm } from "@/features/rooms";
 
 interface RoomsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const RoomsDataGrid: React.FC<RoomsDataGridProps> = ({ canMutate = true }) => {
+export const RoomsDataGrid: React.FC<RoomsDataGridProps> = ({ canWrite = true, canDelete = true }) => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [buildingsMap, setBuildingsMap] = useState<Record<number, Building>>({});
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,27 @@ export const RoomsDataGrid: React.FC<RoomsDataGridProps> = ({ canMutate = true }
   };
 
   useEffect(() => {
-    fetchData();
+    (async () => {
+      try {
+        const [roomsData, buildingsData] = await Promise.all([
+          getRooms(),
+          getBuildings()
+        ]);
+        setRooms(roomsData);
+        
+        const bMap: Record<number, Building> = {};
+        for (const b of buildingsData) {
+          bMap[b.id] = b;
+        }
+        setBuildingsMap(bMap);
+      } catch (err) {
+        if (err instanceof Error) {
+          toast.error("Failed to load rooms", err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const filteredRooms = useMemo(() => {
@@ -111,7 +132,7 @@ export const RoomsDataGrid: React.FC<RoomsDataGridProps> = ({ canMutate = true }
   };
 
   const columnDefs = useMemo<ColDef<Room>[]>(() => {
-    return [
+    const cols: ColDef<Room>[] = [
       {
         field: "id",
         headerName: "ID",
@@ -141,19 +162,26 @@ export const RoomsDataGrid: React.FC<RoomsDataGridProps> = ({ canMutate = true }
         headerName: "Capacity",
         flex: 1,
       },
-      {
+    ];
+
+    if (canWrite || canDelete) {
+      cols.push({
         headerName: "",
         width: 100,
         cellRenderer: ActionCellRenderer,
         cellRendererParams: {
           onEdit: handleEdit,
           onDelete: handleDelete,
+          canEdit: canWrite,
+          canDelete: canDelete,
         },
         sortable: false,
         filter: false,
-      },
-    ];
-  }, [buildingsMap]);
+      });
+    }
+
+    return cols;
+  }, [buildingsMap, canWrite, canDelete]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -187,7 +215,7 @@ export const RoomsDataGrid: React.FC<RoomsDataGridProps> = ({ canMutate = true }
               className="w-full pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded-md focus:border-black focus:outline-none transition-colors bg-white"
             />
           </div>
-          {canMutate && (
+          {canWrite && (
             <button
               onClick={() => {
                 setRoomToEdit(null);

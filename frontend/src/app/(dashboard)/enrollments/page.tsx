@@ -1,12 +1,14 @@
-import { Metadata } from "next";
-import { EnrollmentsDataGrid } from "@/widgets/enrollment";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Course Enrollments | University System",
-  description: "Manage student enrollments, grading, and course progress.",
-};
+import { EnrollmentsDataGrid } from "@/widgets/enrollment";
+import { usePermissions } from "@/entities/session";
 
 export default function EnrollmentsPage() {
+  const { hasPermission } = usePermissions();
+
+  const canWrite = hasPermission("enrollments:write");
+  const canDelete = hasPermission("enrollments:delete");
+
   return (
     <main className="flex-1 flex flex-col h-full p-6 lg:p-8">
       <header className="mb-8 border-b border-neutral-200 pb-6">
@@ -21,7 +23,7 @@ export default function EnrollmentsPage() {
       </header>
 
       <div className="flex-1 min-h-[600px] w-full">
-        <EnrollmentsDataGrid canMutate={true} />
+        <EnrollmentsDataGrid canWrite={canWrite} canDelete={canDelete} />
       </div>
     </main>
   );

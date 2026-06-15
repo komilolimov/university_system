@@ -32,21 +32,23 @@ export const RoomForm: React.FC<RoomFormProps> = ({
   }, [isOpen]);
 
   useEffect(() => {
-    if (room && isOpen) {
-      setFormData({
-        room_number: room.room_number,
-        capacity: room.capacity,
-        type: room.type,
-        building_id: room.building_id,
-      });
-    } else if (isOpen) {
-      setFormData({
-        room_number: "",
-        capacity: 0,
-        type: "Lecture Hall",
-        building_id: 0,
-      });
-    }
+    queueMicrotask(() => {
+      if (room && isOpen) {
+        setFormData({
+          room_number: room.room_number,
+          capacity: room.capacity,
+          type: room.type,
+          building_id: room.building_id,
+        });
+      } else if (isOpen) {
+        setFormData({
+          room_number: "",
+          capacity: 0,
+          type: "Lecture Hall",
+          building_id: 0,
+        });
+      }
+    });
   }, [room, isOpen]);
 
   if (!isOpen) return null;

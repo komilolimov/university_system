@@ -1,12 +1,14 @@
-import { Metadata } from "next";
-import { RoomsDataGrid } from "@/widgets/rooms";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Rooms | University System",
-  description: "Manage campus rooms, lecture halls, and facility capacities.",
-};
+import { RoomsDataGrid } from "@/widgets/rooms";
+import { usePermissions } from "@/entities/session";
 
 export default function RoomsPage() {
+  const { hasPermission } = usePermissions();
+
+  const canWrite = hasPermission("rooms:write");
+  const canDelete = hasPermission("rooms:delete");
+
   return (
     <main className="flex-1 flex flex-col h-full p-6 lg:p-8">
       <header className="mb-8 border-b border-neutral-200 pb-6">
@@ -21,7 +23,7 @@ export default function RoomsPage() {
       </header>
 
       <div className="flex-1 min-h-[600px] w-full">
-        <RoomsDataGrid canMutate={true} />
+        <RoomsDataGrid canWrite={canWrite} canDelete={canDelete} />
       </div>
     </main>
   );

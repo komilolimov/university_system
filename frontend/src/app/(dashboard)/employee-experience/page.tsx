@@ -1,12 +1,14 @@
-import { Metadata } from "next";
-import { EmployeeExperienceDataGrid } from "@/widgets/employee-experience";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Employee Experience | University System",
-  description: "Manage work history and previous positions for university staff.",
-};
+import { EmployeeExperienceDataGrid } from "@/widgets/employee-experience";
+import { usePermissions } from "@/entities/session";
 
 export default function EmployeeExperiencePage() {
+  const { hasPermission } = usePermissions();
+
+  const canWrite = hasPermission("employee_experience:write");
+  const canDelete = hasPermission("employee_experience:delete");
+
   return (
     <main className="flex-1 flex flex-col h-full p-6 lg:p-8">
       {/* Заголовок страницы */}
@@ -23,7 +25,7 @@ export default function EmployeeExperiencePage() {
 
       {/* Контейнер для виджета (таблицы) */}
       <div className="flex-1 min-h-[600px] w-full">
-        <EmployeeExperienceDataGrid canMutate={true} />
+        <EmployeeExperienceDataGrid canWrite={canWrite} canDelete={canDelete} />
       </div>
     </main>
   );

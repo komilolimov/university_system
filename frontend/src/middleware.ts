@@ -23,6 +23,7 @@ const protectedRoutes = [
   "/students",
   "/terms"
 ];
+
 const authRoutes = ["/login", "/register"];
 
 // 🛡️ 1. СЛОВАРЬ ЗАГОЛОВКОВ БЕЗОПАСНОСТИ

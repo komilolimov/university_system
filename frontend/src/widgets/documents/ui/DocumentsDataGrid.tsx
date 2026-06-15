@@ -10,10 +10,11 @@ import { Document, DocumentCreate, DocumentUpdate, getDocuments, createDocument,
 import { ActionCellRenderer, DocumentForm } from "@/features/documents";
 
 interface DocumentsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const DocumentsDataGrid: React.FC<DocumentsDataGridProps> = ({ canMutate = true }) => {
+export const DocumentsDataGrid: React.FC<DocumentsDataGridProps> = ({ canWrite = true, canDelete = true }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,7 +42,18 @@ export const DocumentsDataGrid: React.FC<DocumentsDataGridProps> = ({ canMutate 
   };
 
   useEffect(() => {
-    fetchData();
+    (async () => {
+      try {
+        const data = await getDocuments();
+        setDocuments(data);
+      } catch (err) {
+        if (err instanceof Error) {
+          toast.error("Failed to load documents", err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const filteredDocuments = useMemo(() => {
@@ -101,7 +113,7 @@ export const DocumentsDataGrid: React.FC<DocumentsDataGridProps> = ({ canMutate 
   };
 
   const columnDefs = useMemo<ColDef<Document>[]>(() => {
-    return [
+    const cols: ColDef<Document>[] = [
       {
         field: "id",
         headerName: "ID",
@@ -159,19 +171,26 @@ export const DocumentsDataGrid: React.FC<DocumentsDataGridProps> = ({ canMutate 
           );
         },
       },
-      {
+    ];
+
+    if (canWrite || canDelete) {
+      cols.push({
         headerName: "",
         width: 100,
         cellRenderer: ActionCellRenderer,
         cellRendererParams: {
           onEdit: handleEdit,
           onDelete: handleDelete,
+          canEdit: canWrite,
+          canDelete: canDelete,
         },
         sortable: false,
         filter: false,
-      },
-    ];
-  }, []);
+      });
+    }
+
+    return cols;
+  }, [canWrite, canDelete]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -205,7 +224,7 @@ export const DocumentsDataGrid: React.FC<DocumentsDataGridProps> = ({ canMutate 
               className="w-full pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded-md focus:border-black focus:outline-none transition-colors bg-white"
             />
           </div>
-          {canMutate && (
+          {canWrite && (
             <button
               onClick={() => {
                 setDocumentToEdit(null);

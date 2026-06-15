@@ -1,3 +1,3 @@
-export * from "./ui/PermissionSearch";
-export * from "./ui/PermissionMatrixCard";
-export * from "./ui/SelectAllToggle";
+export { PermissionForm } from "./ui/PermissionForm";
+export { PermissionActionCellRenderer } from "./ui/PermissionActionCellRenderer";
+export { PermissionFiltersToolbar } from "./ui/PermissionFiltersToolbar";

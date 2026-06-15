@@ -1,13 +1,14 @@
-import { Metadata } from "next";
-import { ResearchLabsDataGrid } from "@/widgets/research-lab";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Research Labs | University System",
-  description:
-    "Manage research laboratories and innovation centers across the university.",
-};
+import { ResearchLabsDataGrid } from "@/widgets/research-lab";
+import { usePermissions } from "@/entities/session";
 
 export default function ResearchLabsPage() {
+  const { hasPermission } = usePermissions();
+
+  const canWrite = hasPermission("research_labs:write");
+  const canDelete = hasPermission("research_labs:delete");
+
   return (
     <main className="flex-1 flex flex-col h-full p-6 lg:p-8">
       <header className="mb-8 border-b border-neutral-200 pb-6">
@@ -24,7 +25,7 @@ export default function ResearchLabsPage() {
       </header>
 
       <div className="flex-1 min-h-[600px] w-full">
-        <ResearchLabsDataGrid canMutate={true} />
+        <ResearchLabsDataGrid canWrite={canWrite} canDelete={canDelete} />
       </div>
     </main>
   );

@@ -22,10 +22,11 @@ import { toast } from "@/shared/lib/toast";
 import { Plus } from "lucide-react";
 
 interface StudentProgramsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const StudentProgramsDataGrid = ({ canMutate = true }: StudentProgramsDataGridProps) => {
+export const StudentProgramsDataGrid = ({ canWrite = true, canDelete = true }: StudentProgramsDataGridProps) => {
   const [records, setRecords] = useState<StudentProgram[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [programs, setPrograms] = useState<DegreeProgram[]>([]);
@@ -54,42 +55,72 @@ export const StudentProgramsDataGrid = ({ canMutate = true }: StudentProgramsDat
     });
   }, []);
 
-  const fetchRecords = () => {
+  const fetchRecords = async () => {
     setLoading(true);
-    getStudentPrograms()
-      .then((data) => {
-        let filteredData = data;
-        
-        if (selectedType !== "all") {
-          filteredData = filteredData.filter(d => d.type === selectedType);
-        }
+    try {
+      const data = await getStudentPrograms();
+      let filteredData = data;
+      
+      if (selectedType !== "all") {
+        filteredData = filteredData.filter(d => d.type === selectedType);
+      }
 
-        if (searchQuery.trim()) {
-          const lowerQuery = searchQuery.toLowerCase();
-          filteredData = filteredData.filter(d => {
-            const student = students.find(s => s.id === d.student_id);
-            const program = programs.find(p => p.id === d.program_id);
-            
-            const studentName = student ? `${student.first_name} ${student.last_name}`.toLowerCase() : "";
-            const programName = program ? program.title.toLowerCase() : "";
-            
-            return studentName.includes(lowerQuery) || programName.includes(lowerQuery);
-          });
-        }
+      if (searchQuery.trim()) {
+        const lowerQuery = searchQuery.toLowerCase();
+        filteredData = filteredData.filter(d => {
+          const student = students.find(s => s.id === d.student_id);
+          const program = programs.find(p => p.id === d.program_id);
+          
+          const studentName = student ? `${student.first_name} ${student.last_name}`.toLowerCase() : "";
+          const programName = program ? program.title.toLowerCase() : "";
+          
+          return studentName.includes(lowerQuery) || programName.includes(lowerQuery);
+        });
+      }
 
-        setRecords(filteredData);
-      })
-      .catch((err: unknown) => {
-        if (err instanceof Error) {
-          toast.error("Failed to load student programs", err.message);
-        }
-      })
-      .finally(() => setLoading(false));
+      setRecords(filteredData);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error("Failed to load student programs", err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (isDataLoaded) {
-      fetchRecords();
+      (async () => {
+        try {
+          const data = await getStudentPrograms();
+          let filteredData = data;
+          
+          if (selectedType !== "all") {
+            filteredData = filteredData.filter(d => d.type === selectedType);
+          }
+
+          if (searchQuery.trim()) {
+            const lowerQuery = searchQuery.toLowerCase();
+            filteredData = filteredData.filter(d => {
+              const student = students.find(s => s.id === d.student_id);
+              const program = programs.find(p => p.id === d.program_id);
+              
+              const studentName = student ? `${student.first_name} ${student.last_name}`.toLowerCase() : "";
+              const programName = program ? program.title.toLowerCase() : "";
+              
+              return studentName.includes(lowerQuery) || programName.includes(lowerQuery);
+            });
+          }
+
+          setRecords(filteredData);
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            toast.error("Failed to load student programs", err.message);
+          }
+        } finally {
+          setLoading(false);
+        }
+      })();
     }
   }, [searchQuery, selectedType, isDataLoaded]);
 
@@ -153,7 +184,7 @@ export const StudentProgramsDataGrid = ({ canMutate = true }: StudentProgramsDat
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         flex: 0.5,
@@ -166,7 +197,7 @@ export const StudentProgramsDataGrid = ({ canMutate = true }: StudentProgramsDat
     }
 
     return cols;
-  }, [students, programs, canMutate]);
+  }, [students, programs, canWrite, canDelete]);
 
   const handleAddNew = () => {
     setEditingRecord(null);
@@ -186,7 +217,7 @@ export const StudentProgramsDataGrid = ({ canMutate = true }: StudentProgramsDat
           </p>
         </div>
 
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={handleAddNew}
             className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
@@ -217,7 +248,8 @@ export const StudentProgramsDataGrid = ({ canMutate = true }: StudentProgramsDat
           rowData={records}
           columnDefs={columnDefs}
           context={{
-            canMutate,
+            canEdit: canWrite,
+            canDelete: canDelete,
             onEdit: handleEdit,
             onDelete: handleDelete,
           }}

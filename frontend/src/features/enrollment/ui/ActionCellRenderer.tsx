@@ -8,7 +8,7 @@ export const ActionCellRenderer = (
   props: CustomCellRendererProps<Enrollment>
 ) => {
   const req = props.data;
-  const { onEdit, onDelete } = props.context || {};
+  const { onEdit, onDelete, canEdit, canDelete } = props.context || {};
   const [isPending, startTransition] = useTransition();
 
   if (!req) return null;
@@ -30,12 +30,24 @@ export const ActionCellRenderer = (
 
   return (
     <div className="h-full flex items-center gap-2">
-      <button
-        onClick={handleEdit}
-        className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-neutral-600 hover:text-black hover:bg-neutral-50 active:bg-neutral-100 transition-colors cursor-pointer select-none"
-      >
-        Edit
-      </button>
+      {canEdit && (
+        <button
+          onClick={handleEdit}
+          className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-neutral-600 hover:text-black hover:bg-neutral-50 active:bg-neutral-100 transition-colors cursor-pointer select-none"
+        >
+          Edit
+        </button>
+      )}
+      
+      {canDelete && onDelete && (
+        <button
+          onClick={handleDelete}
+          disabled={isPending}
+          className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-red-600 hover:text-red-700 hover:bg-red-50/50 hover:border-red-100 active:bg-red-100 transition-colors cursor-pointer select-none disabled:opacity-50"
+        >
+          {isPending ? "..." : "Delete"}
+        </button>
+      )}
     </div>
   );
 };

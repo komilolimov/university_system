@@ -3,7 +3,7 @@
 import { apiClient } from "@/shared/api/client";
 import { getErrorMessage } from "@/shared/api/error";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import type { Role, RoleCreate, RoleUpdate } from "../model/types";
+import type { Role, RoleCreate, RoleUpdate, RoleReadWithPermissions } from "../model/types";
 
 export interface GetRolesParams {
   is_active?: boolean | null;
@@ -74,6 +74,49 @@ export const deleteRole = async (id: number): Promise<void> => {
     });
     if (error) {
       console.error(`[deleteRole] API error on ${id}:`, JSON.stringify(error));
+      throw new Error(getErrorMessage(error));
+    }
+  } catch (err: unknown) {
+    if (isRedirectError(err)) throw err;
+    throw new Error(getErrorMessage(err));
+  }
+};
+
+export const getRole = async (id: number): Promise<RoleReadWithPermissions> => {
+  try {
+    const { data, error } = await apiClient.GET("/api/v1/roles/{role_id}", {
+      params: {
+        path: { role_id: id },
+      },
+    });
+    if (error) {
+      console.error(`[getRole] API error on ${id}:`, JSON.stringify(error));
+      throw new Error(getErrorMessage(error));
+    }
+    return data as unknown as RoleReadWithPermissions;
+  } catch (err: unknown) {
+    if (isRedirectError(err)) throw err;
+    throw new Error(getErrorMessage(err));
+  }
+};
+
+export const assignRolePermissions = async (
+  id: number,
+  permissionIds: number[],
+  assignAll = false
+): Promise<void> => {
+  try {
+    const { error } = await apiClient.POST("/api/v1/roles/{role_id}/permissions", {
+      params: {
+        path: { role_id: id },
+      },
+      body: {
+        permission_ids: permissionIds,
+        assign_all: assignAll,
+      },
+    });
+    if (error) {
+      console.error(`[assignRolePermissions] API error on ${id}:`, JSON.stringify(error));
       throw new Error(getErrorMessage(error));
     }
   } catch (err: unknown) {

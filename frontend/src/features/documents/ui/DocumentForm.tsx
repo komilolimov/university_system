@@ -25,25 +25,27 @@ export const DocumentForm: React.FC<DocumentFormProps> = ({
   });
 
   useEffect(() => {
-    if (document && isOpen) {
-      setFormData({
-        owner_type: document.owner_type,
-        owner_id: document.owner_id,
-        document_type: document.document_type,
-        file_url: document.file_url,
-        status: document.status,
-        is_active: document.is_active,
-      });
-    } else if (isOpen) {
-      setFormData({
-        owner_type: "Student",
-        owner_id: 0,
-        document_type: "Passport",
-        file_url: "",
-        status: "Pending",
-        is_active: true,
-      });
-    }
+    queueMicrotask(() => {
+      if (document && isOpen) {
+        setFormData({
+          owner_type: document.owner_type,
+          owner_id: document.owner_id,
+          document_type: document.document_type,
+          file_url: document.file_url,
+          status: document.status,
+          is_active: document.is_active,
+        });
+      } else if (isOpen) {
+        setFormData({
+          owner_type: "Student",
+          owner_id: 0,
+          document_type: "Passport",
+          file_url: "",
+          status: "Pending",
+          is_active: true,
+        });
+      }
+    });
   }, [document, isOpen]);
 
   if (!isOpen) return null;

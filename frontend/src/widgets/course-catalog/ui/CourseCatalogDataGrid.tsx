@@ -13,7 +13,12 @@ import { CourseCatalogForm, ActionCellRenderer, CourseCatalogFiltersToolbar } fr
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import { toast } from "@/shared/lib/toast";
 
-export const CourseCatalogDataGrid = () => {
+interface CourseCatalogDataGridProps {
+  canWrite?: boolean;
+  canDelete?: boolean;
+}
+
+export const CourseCatalogDataGrid = ({ canWrite = true, canDelete = true }: CourseCatalogDataGridProps) => {
   const [courses, setCourses] = useState<CourseCatalog[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
@@ -34,24 +39,37 @@ export const CourseCatalogDataGrid = () => {
   }, [searchQuery]);
 
   // Fetch Courses
-  const fetchCourses = (status: "all" | "active" | "inactive" = selectedStatus, searchStr: string = debouncedSearch) => {
+  const fetchCourses = async (status: "all" | "active" | "inactive" = selectedStatus, searchStr: string = debouncedSearch) => {
     setLoading(true);
     const isActiveParam = status === "active" ? true : status === "inactive" ? false : undefined;
     
-    getCourseCatalogs({ is_active: isActiveParam, q: searchStr, limit: 1000 })
-      .then((data) => {
-        setCourses(data);
-      })
-      .catch((err) => {
-        if (err instanceof Error) {
-          toast.error("Failed to load courses", err.message);
-        }
-      })
-      .finally(() => setLoading(false));
+    try {
+      const data = await getCourseCatalogs({ is_active: isActiveParam, q: searchStr, limit: 1000 });
+      setCourses(data);
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error("Failed to load courses", err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchCourses(selectedStatus, debouncedSearch);
+    (async () => {
+      const isActiveParam = selectedStatus === "active" ? true : selectedStatus === "inactive" ? false : undefined;
+      
+      try {
+        const data = await getCourseCatalogs({ is_active: isActiveParam, q: debouncedSearch, limit: 1000 });
+        setCourses(data);
+      } catch (err) {
+        if (err instanceof Error) {
+          toast.error("Failed to load courses", err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [selectedStatus, debouncedSearch]);
 
   // Handlers
@@ -108,7 +126,7 @@ export const CourseCatalogDataGrid = () => {
 
   // AG Grid Columns
   const columnDefs = useMemo<ColDef<CourseCatalog>[]>(() => {
-    return [
+    const cols: ColDef<CourseCatalog>[] = [
       {
         field: "code",
         headerName: "Code",
@@ -151,16 +169,21 @@ export const CourseCatalogDataGrid = () => {
           );
         },
       },
-      {
+    ];
+
+    if (canWrite || canDelete) {
+      cols.push({
         headerName: "Actions",
         flex: 1,
         sortable: false,
         filter: false,
         pinned: "right",
         cellRenderer: ActionCellRenderer,
-      },
-    ];
-  }, []);
+      });
+    }
+
+    return cols;
+  }, [canWrite, canDelete]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -174,16 +197,18 @@ export const CourseCatalogDataGrid = () => {
             Create and manage university courses
           </p>
         </div>
-        <button
-          onClick={() => {
-            setCourseToEdit(null);
-            setIsFormOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Add Course
-        </button>
+        {canWrite && (
+          <button
+            onClick={() => {
+              setCourseToEdit(null);
+              setIsFormOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Course
+          </button>
+        )}
       </div>
 
       {/* Toolbar */}
@@ -205,6 +230,8 @@ export const CourseCatalogDataGrid = () => {
           rowData={courses}
           columnDefs={columnDefs}
           context={{
+            canEdit: canWrite,
+            canDelete: canDelete,
             onEdit: handleEdit,
             onDelete: handleDelete,
             onActivate: handleActivate,

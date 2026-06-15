@@ -16,10 +16,11 @@ import type { components } from "@/shared/api/schema";
 type Department = components["schemas"]["DepartmentRead"];
 
 interface DegreeProgramsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const DegreeProgramsDataGrid = ({ canMutate = true }: DegreeProgramsDataGridProps) => {
+export const DegreeProgramsDataGrid = ({ canWrite = true, canDelete = true }: DegreeProgramsDataGridProps) => {
 
   const [programs, setPrograms] = useState<DegreeProgram[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -127,7 +128,9 @@ export const DegreeProgramsDataGrid = ({ canMutate = true }: DegreeProgramsDataG
   const gridContext = useMemo(() => ({
     onEdit: handleEdit,
     onDelete: handleDelete,
-  }), [programs]);
+    canEdit: canWrite,
+    canDelete: canDelete,
+  }), [programs, canWrite, canDelete]);
 
   const columnDefs = useMemo<ColDef<DegreeProgram>[]>(() => {
     const cols: ColDef<DegreeProgram>[] = [
@@ -162,7 +165,7 @@ export const DegreeProgramsDataGrid = ({ canMutate = true }: DegreeProgramsDataG
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         width: 150,
@@ -174,7 +177,7 @@ export const DegreeProgramsDataGrid = ({ canMutate = true }: DegreeProgramsDataG
     }
 
     return cols;
-  }, [canMutate, departments]);
+  }, [canWrite, canDelete, departments]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -189,7 +192,7 @@ export const DegreeProgramsDataGrid = ({ canMutate = true }: DegreeProgramsDataG
           </p>
         </div>
 
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={() => {
               setEditingProgram(null);

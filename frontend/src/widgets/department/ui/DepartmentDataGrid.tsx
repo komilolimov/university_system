@@ -17,10 +17,11 @@ import type { components } from "@/shared/api/schema";
 type School = components["schemas"]["SchoolRead"];
 
 interface DepartmentDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const DepartmentDataGrid = ({ canMutate = true }: DepartmentDataGridProps) => {
+export const DepartmentDataGrid = ({ canWrite = true, canDelete = true }: DepartmentDataGridProps) => {
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
@@ -126,9 +127,11 @@ export const DepartmentDataGrid = ({ canMutate = true }: DepartmentDataGridProps
   };
 
   const gridContext = useMemo(() => ({
+    canEdit: canWrite,
+    canDelete: canDelete,
     onEdit: handleEdit,
     onDelete: handleDelete,
-  }), [departments]);
+  }), [departments, canWrite, canDelete]);
 
   const columnDefs = useMemo<ColDef<Department>[]>(() => {
     const cols: ColDef<Department>[] = [
@@ -153,7 +156,7 @@ export const DepartmentDataGrid = ({ canMutate = true }: DepartmentDataGridProps
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         width: 150,
@@ -165,7 +168,7 @@ export const DepartmentDataGrid = ({ canMutate = true }: DepartmentDataGridProps
     }
 
     return cols;
-  }, [canMutate, schools]);
+  }, [canWrite, canDelete, schools]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -180,7 +183,7 @@ export const DepartmentDataGrid = ({ canMutate = true }: DepartmentDataGridProps
           </p>
         </div>
 
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={() => {
               setEditingDepartment(null);

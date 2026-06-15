@@ -14,10 +14,11 @@ import { toast } from "@/shared/lib/toast";
 import { Plus } from "lucide-react";
 
 interface TermsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const TermsDataGrid = ({ canMutate = true }: TermsDataGridProps) => {
+export const TermsDataGrid = ({ canWrite = true, canDelete = true }: TermsDataGridProps) => {
   const [terms, setTerms] = useState<Term[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -178,7 +179,7 @@ export const TermsDataGrid = ({ canMutate = true }: TermsDataGridProps) => {
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         flex: 1,
@@ -190,7 +191,7 @@ export const TermsDataGrid = ({ canMutate = true }: TermsDataGridProps) => {
     }
 
     return cols;
-  }, [canMutate]);
+  }, [canWrite, canDelete]);
 
   const handleAddNew = () => {
     setEditingTerm(null);
@@ -209,7 +210,7 @@ export const TermsDataGrid = ({ canMutate = true }: TermsDataGridProps) => {
           </p>
         </div>
 
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={handleAddNew}
             className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
@@ -238,7 +239,8 @@ export const TermsDataGrid = ({ canMutate = true }: TermsDataGridProps) => {
           rowData={terms}
           columnDefs={columnDefs}
           context={{
-            canMutate,
+            canEdit: canWrite,
+            canDelete: canDelete,
             onEdit: handleEdit,
             onDelete: handleDelete,
             onActivate: handleActivate,

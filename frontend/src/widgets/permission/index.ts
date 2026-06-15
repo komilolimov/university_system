@@ -1,1 +1,1 @@
-export * from "./ui/PermissionsManager";
+export { PermissionsDataGrid } from "./ui/PermissionsDataGrid";

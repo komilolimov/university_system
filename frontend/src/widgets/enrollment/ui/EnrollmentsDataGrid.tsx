@@ -19,10 +19,11 @@ import { type CourseOffering } from "@/entities/course-offerings";
 type Student = components["schemas"]["StudentRead"];
 
 interface EnrollmentsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridProps) => {
+export const EnrollmentsDataGrid = ({ canWrite = true, canDelete = true }: EnrollmentsDataGridProps) => {
 
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
@@ -138,9 +139,11 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
   };
 
   const gridContext = useMemo(() => ({
+    canEdit: canWrite,
+    canDelete: canDelete,
     onEdit: handleEdit,
     onChangeStatus: handleChangeStatus,
-  }), [enrollments]);
+  }), [enrollments, canWrite, canDelete]);
 
   const columnDefs = useMemo<ColDef<Enrollment>[]>(() => {
     const cols: ColDef<Enrollment>[] = [
@@ -169,7 +172,7 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
         headerName: "Status",
         field: "status",
         width: 150,
-        cellRenderer: canMutate ? StatusCellRenderer : undefined,
+        cellRenderer: canWrite ? StatusCellRenderer : undefined,
       },
       {
         headerName: "Grade",
@@ -185,7 +188,7 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         width: 150,
@@ -197,7 +200,7 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
     }
 
     return cols;
-  }, [canMutate, students, offerings, catalogs]);
+  }, [canWrite, canDelete, students, offerings, catalogs]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -212,7 +215,7 @@ export const EnrollmentsDataGrid = ({ canMutate = true }: EnrollmentsDataGridPro
           </p>
         </div>
 
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={() => {
               setEditingEnrollment(null);

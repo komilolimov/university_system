@@ -10,10 +10,11 @@ import { Building, BuildingCreate, BuildingUpdate, getBuildings, createBuilding,
 import { ActionCellRenderer, BuildingForm } from "@/features/buildings";
 
 interface BuildingsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const BuildingsDataGrid: React.FC<BuildingsDataGridProps> = ({ canMutate = true }) => {
+export const BuildingsDataGrid: React.FC<BuildingsDataGridProps> = ({ canWrite = true, canDelete = true }) => {
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,20 +27,33 @@ export const BuildingsDataGrid: React.FC<BuildingsDataGridProps> = ({ canMutate 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const fetchBuildings = () => {
+  const fetchBuildings = async () => {
     setLoading(true);
-    getBuildings()
-      .then((data) => setBuildings(data))
-      .catch((err) => {
-        if (err instanceof Error) {
-          toast.error("Failed to load buildings", err.message);
-        }
-      })
-      .finally(() => setLoading(false));
+    try {
+      const data = await getBuildings();
+      setBuildings(data);
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error("Failed to load buildings", err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchBuildings();
+    (async () => {
+      try {
+        const data = await getBuildings();
+        setBuildings(data);
+      } catch (err) {
+        if (err instanceof Error) {
+          toast.error("Failed to load buildings", err.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   const filteredBuildings = useMemo(() => {
@@ -114,7 +128,7 @@ export const BuildingsDataGrid: React.FC<BuildingsDataGridProps> = ({ canMutate 
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "",
         width: 100,
@@ -122,6 +136,8 @@ export const BuildingsDataGrid: React.FC<BuildingsDataGridProps> = ({ canMutate 
         cellRendererParams: {
           onEdit: handleEdit,
           onDelete: handleDelete,
+          canEdit: canWrite,
+          canDelete: canDelete,
         },
         sortable: false,
         filter: false,
@@ -129,7 +145,7 @@ export const BuildingsDataGrid: React.FC<BuildingsDataGridProps> = ({ canMutate 
     }
 
     return cols;
-  }, [canMutate]);
+  }, [canWrite, canDelete]);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -163,7 +179,7 @@ export const BuildingsDataGrid: React.FC<BuildingsDataGridProps> = ({ canMutate 
               className="w-full pl-9 pr-4 py-2 text-sm border border-neutral-200 rounded-md focus:border-black focus:outline-none transition-colors bg-white"
             />
           </div>
-          {canMutate && (
+          {canWrite && (
             <button
               onClick={() => {
                 setBuildingToEdit(null);

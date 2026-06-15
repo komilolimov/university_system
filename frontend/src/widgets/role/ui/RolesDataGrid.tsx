@@ -9,11 +9,16 @@ import {
   updateRole,
   type Role,
 } from "@/entities/role";
-import { RoleForm, ActionCellRenderer, RoleFiltersToolbar } from "@/features/role";
+import { RoleForm, ActionCellRenderer, RoleFiltersToolbar, RolePermissionsDrawer } from "@/features/role";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import { toast } from "@/shared/lib/toast";
 
-export const RolesDataGrid = () => {
+interface RolesDataGridProps {
+  canWrite?: boolean;
+  canDelete?: boolean;
+}
+
+export const RolesDataGrid = ({ canWrite = true, canDelete = true }: RolesDataGridProps) => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
@@ -27,6 +32,10 @@ export const RolesDataGrid = () => {
   // Form State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [roleToEdit, setRoleToEdit] = useState<Role | null>(null);
+
+  // Drawer State
+  const [isPermissionsDrawerOpen, setIsPermissionsDrawerOpen] = useState(false);
+  const [roleToManagePermissions, setRoleToManagePermissions] = useState<number | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -77,6 +86,11 @@ export const RolesDataGrid = () => {
     setIsFormOpen(true);
   };
 
+  const handleManagePermissions = (roleId: number) => {
+    setRoleToManagePermissions(roleId);
+    setIsPermissionsDrawerOpen(true);
+  };
+
   const handleDelete = (id: number) => {
     toast.confirm(
       "Archive Role",
@@ -99,38 +113,38 @@ export const RolesDataGrid = () => {
   };
 
   const handleActivate = (id: number) => {
-  const role = roles.find((r) => r.id === id);
+    const role = roles.find((r) => r.id === id);
 
-  if (!role) {
-    toast.error("Role not found");
-    return;
-  }
+    if (!role) {
+      toast.error("Role not found");
+      return;
+    }
 
-  startTransition(() => {
-    updateRole(id, {
-      title: role.title,
-      is_faculty: role.is_faculty,
-      is_active: true,
-    })
-      .then(() => {
-        toast.success("Role activated");
-        fetchRoles(selectedStatus);
+    startTransition(() => {
+      updateRole(id, {
+        title: role.title,
+        is_faculty: role.is_faculty,
+        is_active: true,
       })
-      .catch((err: unknown) => {
-        if (err instanceof Error) {
-          toast.error("Failed to activate role", err.message);
-        }
-      });
-  });
-};
+        .then(() => {
+          toast.success("Role activated");
+          fetchRoles(selectedStatus);
+        })
+        .catch((err: unknown) => {
+          if (err instanceof Error) {
+            toast.error("Failed to activate role", err.message);
+          }
+        });
+    });
+  };
 
   // AG Grid Columns
   const columnDefs = useMemo<ColDef<Role>[]>(() => {
-    return [
+    const cols: ColDef<Role>[] = [
       {
         field: "title",
         headerName: "Role Title",
-        flex: 2,
+        flex: 1,
       },
       {
         field: "is_faculty",
@@ -152,16 +166,20 @@ export const RolesDataGrid = () => {
           );
         },
       },
-      {
+    ];
+
+    if (canWrite || canDelete) {
+      cols.push({
         headerName: "Actions",
         flex: 1,
         sortable: false,
         filter: false,
-        pinned: "right",
         cellRenderer: ActionCellRenderer,
-      },
-    ];
-  }, []);
+      });
+    }
+
+    return cols;
+  }, [canWrite, canDelete]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -175,16 +193,18 @@ export const RolesDataGrid = () => {
             Create and manage access roles and faculty status
           </p>
         </div>
-        <button
-          onClick={() => {
-            setRoleToEdit(null);
-            setIsFormOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Add Role
-        </button>
+        {canWrite && (
+          <button
+            onClick={() => {
+              setRoleToEdit(null);
+              setIsFormOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Role
+          </button>
+        )}
       </div>
 
       {/* Toolbar */}
@@ -208,9 +228,12 @@ export const RolesDataGrid = () => {
           rowData={filteredRoles}
           columnDefs={columnDefs}
           context={{
+            canEdit: canWrite,
+            canDelete: canDelete,
             onEdit: handleEdit,
             onDelete: handleDelete,
             onActivate: handleActivate,
+            onManagePermissions: handleManagePermissions,
           }}
           height={600}
         />
@@ -222,6 +245,13 @@ export const RolesDataGrid = () => {
         onClose={() => setIsFormOpen(false)}
         role={roleToEdit}
         onSubmitSuccess={fetchRoles}
+      />
+
+      {/* Permissions Drawer */}
+      <RolePermissionsDrawer
+        isOpen={isPermissionsDrawerOpen}
+        onClose={() => setIsPermissionsDrawerOpen(false)}
+        roleId={roleToManagePermissions}
       />
     </div>
   );

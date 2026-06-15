@@ -21,17 +21,19 @@ export const BuildingForm: React.FC<BuildingFormProps> = ({
   });
 
   useEffect(() => {
-    if (building && isOpen) {
-      setFormData({
-        code: building.code,
-        name: building.name || "",
-      });
-    } else if (isOpen) {
-      setFormData({
-        code: "",
-        name: "",
-      });
-    }
+    queueMicrotask(() => {
+      if (building && isOpen) {
+        setFormData({
+          code: building.code,
+          name: building.name || "",
+        });
+      } else if (isOpen) {
+        setFormData({
+          code: "",
+          name: "",
+        });
+      }
+    });
   }, [building, isOpen]);
 
   if (!isOpen) return null;

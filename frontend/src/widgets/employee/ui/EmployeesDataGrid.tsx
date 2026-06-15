@@ -16,10 +16,11 @@ import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import { toast } from "@/shared/lib/toast";
 
 interface EmployeesDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) => {
+export const EmployeesDataGrid = ({ canWrite = true, canDelete = true }: EmployeesDataGridProps) => {
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -213,7 +214,7 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         flex: 1,
@@ -225,7 +226,7 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
     }
 
     return cols;
-  }, [roles, departments, canMutate]);
+  }, [roles, departments, canWrite, canDelete]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -239,7 +240,7 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
             Manage staff members and advisors
           </p>
         </div>
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={() => {
               setEmployeeToEdit(null);
@@ -278,7 +279,8 @@ export const EmployeesDataGrid = ({ canMutate = true }: EmployeesDataGridProps) 
           rowData={employees}
           columnDefs={columnDefs}
           context={{
-            canMutate,
+            canEdit: canWrite,
+            canDelete,
             onEdit: handleEdit,
             onDelete: handleDelete,
             onActivate: handleActivate

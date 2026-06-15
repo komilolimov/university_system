@@ -15,31 +15,33 @@ export const ScheduleInput: React.FC<ScheduleInputProps> = ({ value, onChange })
   const [endTime, setEndTime] = useState<string>("");
 
   useEffect(() => {
-    if (!value) {
-      setDays([]);
-      setStartTime("");
-      setEndTime("");
-      return;
-    }
-    
-    // Example format: "Mon/Wed 10:00-11:30"
-    const parts = value.split(" ");
-    if (parts.length >= 1) {
-      const parsedDays = parts[0].split("/");
-      const validDays = parsedDays.filter(d => DAYS.includes(d));
-      setDays(validDays);
-      
-      if (parts.length >= 2) {
-        const timeParts = parts[1].split("-");
-        if (timeParts.length === 2) {
-          setStartTime(timeParts[0]);
-          setEndTime(timeParts[1]);
-        }
-      } else {
+    queueMicrotask(() => {
+      if (!value) {
+        setDays([]);
         setStartTime("");
         setEndTime("");
+        return;
       }
-    }
+      
+      // Example format: "Mon/Wed 10:00-11:30"
+      const parts = value.split(" ");
+      if (parts.length >= 1) {
+        const parsedDays = parts[0].split("/");
+        const validDays = parsedDays.filter(d => DAYS.includes(d));
+        setDays(validDays);
+        
+        if (parts.length >= 2) {
+          const timeParts = parts[1].split("-");
+          if (timeParts.length === 2) {
+            setStartTime(timeParts[0]);
+            setEndTime(timeParts[1]);
+          }
+        } else {
+          setStartTime("");
+          setEndTime("");
+        }
+      }
+    });
   }, [value]);
 
   const updateValue = (newDays: string[], newStart: string, newEnd: string) => {

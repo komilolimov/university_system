@@ -1,18 +1,7 @@
 import { GraduationCap } from "lucide-react";
-import { NavigationLink, IconName } from "@/shared/ui";
 import { getJwtPayload } from "@/shared/auth/jwt";
 import { LogoutButton } from "@/features/auth/logout";
-
-interface SidebarSection {
-  title: string;
-  managementOnly?: boolean; // Добавлен флаг для управления доступом
-  items: {
-    href: string;
-    label: string;
-    icon: IconName;
-    exact?: boolean;
-  }[];
-}
+import { SidebarNav } from "./SidebarNav";
 
 export const Sidebar = async () => {
   // 1. Fetch user session information from JWT token
@@ -39,74 +28,6 @@ export const Sidebar = async () => {
           .toUpperCase()
       : "US";
 
-  const isAdmin = role === "Admin";
-  const canManage = role !== "Student";
-
-  // 2. Новая структура навигации (разбитая по доменам)
-  const sections: SidebarSection[] = [
-    {
-      title: "Overview",
-      items: [
-        { href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard", exact: true },
-      ],
-    },
-    {
-      title: "Academics",
-      items: [
-        { href: "/degree-programs", label: "Degree Programs", icon: "Award" },
-        { href: "/program-requirements", label: "Program Reqs", icon: "ClipboardList" },
-        { href: "/course-catalog", label: "Course Catalog", icon: "BookOpen" },
-        { href: "/course-offerings", label: "Course Offerings", icon: "CalendarCheck" },
-        { href: "/terms", label: "Terms", icon: "CalendarDays" },
-      ],
-    },
-    {
-      title: "Students",
-      managementOnly: true,
-      items: [
-        { href: "/students", label: "Directory", icon: "GraduationCap" },
-        { href: "/student-programs", label: "Programs", icon: "BookUser" },
-        { href: "/enrollments", label: "Enrollments", icon: "FileSignature" },
-        { href: "/documents", label: "Documents", icon: "FileText" },
-      ],
-    },
-    {
-      title: "Faculty & Staff",
-      managementOnly: true,
-      items: [
-        { href: "/employees", label: "Directory", icon: "Users" },
-        { href: "/employee-experience", label: "Experience", icon: "Briefcase" },
-      ],
-    },
-    {
-      title: "Campus",
-      managementOnly: true,
-      items: [
-        { href: "/schools", label: "Schools", icon: "School" },
-        { href: "/departments", label: "Departments", icon: "Building" },
-        { href: "/research-labs", label: "Research Labs", icon: "Microscope" },
-        { href: "/buildings", label: "Buildings", icon: "Building2" },
-        { href: "/rooms", label: "Rooms", icon: "DoorOpen" },
-      ],
-    },
-    {
-      title: "System Admin",
-      managementOnly: true,
-      items: [
-        { href: "/roles", label: "Roles", icon: "ShieldCheck" },
-        { href: "/permissions", label: "Permissions", icon: "Key" },
-      ],
-    },
-  ];
-
-  // 3. Filter sections based on Role-Based Access Control (RBAC)
-  const visibleSections = sections.filter((section) => {
-    if (section.managementOnly && !canManage) {
-      return false;
-    }
-    return true;
-  });
-
   return (
     <aside className="hidden md:flex flex-col w-64 h-screen border-r border-neutral-200 bg-transparent font-sans shrink-0 select-none">
       {/* Header */}
@@ -117,27 +38,8 @@ export const Sidebar = async () => {
         </span>
       </div>
 
-      {/* Navigation Sections со скрытым нативным скроллбаром */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-8 scrollbar-thin scrollbar-thumb-neutral-200 scrollbar-track-transparent">
-        {visibleSections.map((section) => (
-          <div key={section.title} className="flex flex-col gap-2">
-            <h3 className="px-2 text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-              {section.title}
-            </h3>
-            <div className="flex flex-col gap-1">
-              {section.items.map((item) => (
-                <NavigationLink
-                  key={item.href}
-                  href={item.href}
-                  label={item.label}
-                  icon={item.icon}
-                  exact={item.exact}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Navigation Sections */}
+      <SidebarNav />
 
       {/* Footer */}
       <div className="p-4 border-t border-neutral-200 flex items-center justify-between gap-3">

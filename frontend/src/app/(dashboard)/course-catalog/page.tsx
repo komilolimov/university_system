@@ -1,13 +1,15 @@
-import React from "react";
-import { Metadata } from "next";
-import { CourseCatalogDataGrid } from "@/widgets/course-catalog";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Course Catalog | University System",
-  description: "Manage university courses and catalog.",
-};
+import React from "react";
+import { CourseCatalogDataGrid } from "@/widgets/course-catalog";
+import { usePermissions } from "@/entities/session";
 
 export default function CourseCatalogPage() {
+  const { hasPermission } = usePermissions();
+
+  const canWrite = hasPermission("course_catalog:write");
+  const canDelete = hasPermission("course_catalog:delete");
+
   return (
     <main className="flex-1 flex flex-col h-full p-6 lg:p-8">
       <header className="mb-8 border-b border-neutral-200 pb-6">
@@ -22,8 +24,7 @@ export default function CourseCatalogPage() {
       </header>
 
       <div className="flex-1 min-h-[600px] w-full">
-        {/* Если CourseCatalogDataGrid поддерживает пропс canMutate, можешь добавить canMutate={true} */}
-        <CourseCatalogDataGrid />
+        <CourseCatalogDataGrid canWrite={canWrite} canDelete={canDelete} />
       </div>
     </main>
   );

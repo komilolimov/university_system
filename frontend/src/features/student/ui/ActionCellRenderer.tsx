@@ -40,29 +40,33 @@ export const ActionCellRenderer = (
 
   return (
     <div className="h-full flex items-center gap-2">
-      <button
-        onClick={handleEdit}
-        className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-neutral-600 hover:text-black hover:bg-neutral-50 active:bg-neutral-100 transition-colors cursor-pointer select-none"
-      >
-        Edit
-      </button>
+      {props.context?.canEdit && (
+        <button
+          onClick={handleEdit}
+          className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-neutral-600 hover:text-black hover:bg-neutral-50 active:bg-neutral-100 transition-colors cursor-pointer select-none"
+        >
+          Edit
+        </button>
+      )}
 
-      {student.is_active ? (
-        <button
-          onClick={handleDelete}
-          disabled={isPending}
-          className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-red-600 hover:text-red-700 hover:bg-red-50/50 hover:border-red-100 active:bg-red-100 transition-colors cursor-pointer select-none disabled:opacity-50"
-        >
-          {isPending ? "..." : "Archive"}
-        </button>
-      ) : (
-        <button
-          onClick={handleActivate}
-          disabled={isPending}
-          className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50/50 hover:border-emerald-100 active:bg-emerald-100 transition-colors cursor-pointer select-none disabled:opacity-50"
-        >
-          {isPending ? "..." : "Activate"}
-        </button>
+      {props.context?.canDelete && (
+        student.is_active ? (
+          <button
+            onClick={handleDelete}
+            disabled={isPending}
+            className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-red-600 hover:text-red-700 hover:bg-red-50/50 hover:border-red-100 active:bg-red-100 transition-colors cursor-pointer select-none disabled:opacity-50"
+          >
+            {isPending ? "..." : "Archive"}
+          </button>
+        ) : (
+          <button
+            onClick={handleActivate}
+            disabled={isPending}
+            className="h-7 px-2.5 text-xs font-semibold rounded border border-neutral-200 bg-white text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50/50 hover:border-emerald-100 active:bg-emerald-100 transition-colors cursor-pointer select-none disabled:opacity-50"
+          >
+            {isPending ? "..." : "Activate"}
+          </button>
+        )
       )}
     </div>
   );

@@ -17,7 +17,12 @@ import { getRooms, type Room } from "@/entities/rooms";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import { toast } from "@/shared/lib/toast";
 
-export const CourseOfferingsDataGrid = () => {
+interface CourseOfferingsDataGridProps {
+  canWrite?: boolean;
+  canDelete?: boolean;
+}
+
+export const CourseOfferingsDataGrid = ({ canWrite = true, canDelete = true }: CourseOfferingsDataGridProps) => {
   const [offerings, setOfferings] = useState<CourseOffering[]>([]);
   const [catalogs, setCatalogs] = useState<CourseCatalog[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
@@ -140,7 +145,7 @@ export const CourseOfferingsDataGrid = () => {
 
   // AG Grid Columns
   const columnDefs = useMemo<ColDef<CourseOffering>[]>(() => {
-    return [
+    const cols: ColDef<CourseOffering>[] = [
       {
         headerName: "Course",
         field: "catalog_id",
@@ -222,16 +227,21 @@ export const CourseOfferingsDataGrid = () => {
           );
         },
       },
-      {
+    ];
+
+    if (canWrite || canDelete) {
+      cols.push({
         headerName: "Actions",
         flex: 1,
         sortable: false,
         filter: false,
         pinned: "right",
         cellRenderer: ActionCellRenderer,
-      },
-    ];
-  }, []);
+      });
+    }
+
+    return cols;
+  }, [canWrite, canDelete, catalogs, terms, employees, rooms]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -245,16 +255,18 @@ export const CourseOfferingsDataGrid = () => {
             Manage terms, instructors, and capacities
           </p>
         </div>
-        <button
-          onClick={() => {
-            setOfferingToEdit(null);
-            setIsFormOpen(true);
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Add Offering
-        </button>
+        {canWrite && (
+          <button
+            onClick={() => {
+              setOfferingToEdit(null);
+              setIsFormOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-900 transition-colors shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Offering
+          </button>
+        )}
       </div>
 
       {/* Toolbar */}
@@ -276,6 +288,8 @@ export const CourseOfferingsDataGrid = () => {
           rowData={filteredOfferings}
           columnDefs={columnDefs}
           context={{
+            canEdit: canWrite,
+            canDelete: canDelete,
             onEdit: handleEdit,
             onDelete: handleDelete,
             onActivate: handleActivate,

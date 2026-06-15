@@ -19,10 +19,11 @@ import { type Term } from "@/entities/terms";
 type DegreeProgram = components["schemas"]["DegreeProgramRead"];
 
 interface ProgramRequirementsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequirementsDataGridProps) => {
+export const ProgramRequirementsDataGrid = ({ canWrite = true, canDelete = true }: ProgramRequirementsDataGridProps) => {
 
   const [requirements, setRequirements] = useState<ProgramRequirement[]>([]);
   const [programs, setPrograms] = useState<DegreeProgram[]>([]);
@@ -137,7 +138,9 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
   const gridContext = useMemo(() => ({
     onEdit: handleEdit,
     onDelete: handleDelete,
-  }), [requirements]);
+    canEdit: canWrite,
+    canDelete: canDelete,
+  }), [requirements, canWrite, canDelete]);
 
   const columnDefs = useMemo<ColDef<ProgramRequirement>[]>(() => {
     const cols: ColDef<ProgramRequirement>[] = [
@@ -180,7 +183,7 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         width: 150,
@@ -192,7 +195,7 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
     }
 
     return cols;
-  }, [canMutate, programs, courses]);
+  }, [canWrite, canDelete, programs, courses, terms]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -207,7 +210,7 @@ export const ProgramRequirementsDataGrid = ({ canMutate = true }: ProgramRequire
           </p>
         </div>
 
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={() => {
               setEditingRequirement(null);

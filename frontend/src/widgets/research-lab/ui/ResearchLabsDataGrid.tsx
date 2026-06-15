@@ -16,10 +16,11 @@ import type { components } from "@/shared/api/schema";
 type Department = components["schemas"]["DepartmentRead"];
 
 interface ResearchLabsDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const ResearchLabsDataGrid = ({ canMutate = true }: ResearchLabsDataGridProps) => {
+export const ResearchLabsDataGrid = ({ canWrite = true, canDelete = true }: ResearchLabsDataGridProps) => {
 
   const [labs, setLabs] = useState<ResearchLab[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -125,9 +126,11 @@ export const ResearchLabsDataGrid = ({ canMutate = true }: ResearchLabsDataGridP
   };
 
   const gridContext = useMemo(() => ({
+    canEdit: canWrite,
+    canDelete: canDelete,
     onEdit: handleEdit,
     onDelete: handleDelete,
-  }), [labs]);
+  }), [labs, canWrite, canDelete]);
 
   const columnDefs = useMemo<ColDef<ResearchLab>[]>(() => {
     const cols: ColDef<ResearchLab>[] = [
@@ -152,7 +155,7 @@ export const ResearchLabsDataGrid = ({ canMutate = true }: ResearchLabsDataGridP
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         width: 150,
@@ -164,7 +167,7 @@ export const ResearchLabsDataGrid = ({ canMutate = true }: ResearchLabsDataGridP
     }
 
     return cols;
-  }, [canMutate, departments]);
+  }, [canWrite, canDelete, departments]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -179,7 +182,7 @@ export const ResearchLabsDataGrid = ({ canMutate = true }: ResearchLabsDataGridP
           </p>
         </div>
 
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={() => {
               setEditingLab(null);

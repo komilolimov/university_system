@@ -25,10 +25,11 @@ import {
 import type { ColDef } from "ag-grid-community";
 
 interface EmployeeExperienceDataGridProps {
-  canMutate?: boolean;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }
 
-export const EmployeeExperienceDataGrid = ({ canMutate = true }: EmployeeExperienceDataGridProps) => {
+export const EmployeeExperienceDataGrid = ({ canWrite = true, canDelete = true }: EmployeeExperienceDataGridProps) => {
   const [experiences, setExperiences] = useState<EmployeeExperience[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   
@@ -158,7 +159,7 @@ export const EmployeeExperienceDataGrid = ({ canMutate = true }: EmployeeExperie
       },
     ];
 
-    if (canMutate) {
+    if (canWrite || canDelete) {
       cols.push({
         headerName: "Actions",
         flex: 1,
@@ -170,7 +171,7 @@ export const EmployeeExperienceDataGrid = ({ canMutate = true }: EmployeeExperie
     }
 
     return cols;
-  }, [canMutate, employees]);
+  }, [canWrite, canDelete, employees]);
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -184,7 +185,7 @@ export const EmployeeExperienceDataGrid = ({ canMutate = true }: EmployeeExperie
             Manage staff work history and previous positions
           </p>
         </div>
-        {canMutate && (
+        {canWrite && (
           <button
             onClick={() => {
               setExperienceToEdit(null);
@@ -218,7 +219,8 @@ export const EmployeeExperienceDataGrid = ({ canMutate = true }: EmployeeExperie
           rowData={filteredExperiences}
           columnDefs={columnDefs}
           context={{
-            canMutate,
+            canEdit: canWrite,
+            canDelete,
             onEdit: handleEdit,
             onDelete: handleDelete,
           }}
