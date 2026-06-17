@@ -9,7 +9,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="w-full flex flex-col gap-8 px-6 py-8 sm:px-10 font-sans">
-      {(role === "Admin" || "Administrator") && <AdminDashboard />}
+      {(role === "Admin" || role === "Administrator") && <AdminDashboard />}
       {role === "Faculty" && <FacultyDashboard />}
       {(role === "Student" || !role) && <StudentDashboard />}
     </main>
