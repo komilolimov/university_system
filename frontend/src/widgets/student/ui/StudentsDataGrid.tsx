@@ -197,38 +197,51 @@ const handleActivate = (id: number) => {
     onActivate: handleActivate,
   }), [students, canWrite, canDelete]);
 
-  // Column definitions for AG Grid
+// Column definitions for AG Grid
 const columnDefs = useMemo<ColDef<Student>[]>(() => {
   const cols: ColDef<Student>[] = [
     {
       field: "first_name",
       headerName: "First Name",
       flex: 1,
+      minWidth: 140,
+      pinned: "left",
+      filter: false,
     },
     {
       field: "last_name",
       headerName: "Last Name",
       flex: 1,
+      minWidth: 140,
+      filter: false,
     },
     {
       field: "email",
       headerName: "Email",
       flex: 1.5,
+      minWidth: 180,
+      filter: false,
     },
     {
       field: "region",
       headerName: "Region",
       flex: 1,
+      minWidth: 120,
+      filter: false,
     },
     {
       field: "enrollment_date",
       headerName: "Enrollment Date",
       flex: 1,
+      minWidth: 150,
+      filter: false,
       valueFormatter: (params) => params.value || "-",
     },
     {
       headerName: "Advisor",
       flex: 1.5,
+      minWidth: 160,
+      filter: false,
       valueGetter: (params) => {
         const data = params.data;
         if (!data?.advisor_id) return "Unassigned";
@@ -246,6 +259,8 @@ const columnDefs = useMemo<ColDef<Student>[]>(() => {
       field: "is_active",
       headerName: "Status",
       width: 120,
+      minWidth: 120,
+      filter: false,
       valueFormatter: (params) =>
         params.value ? "Active" : "Inactive",
       cellRenderer: (
@@ -280,7 +295,8 @@ const columnDefs = useMemo<ColDef<Student>[]>(() => {
   if (canWrite || canDelete) {
     cols.push({
       headerName: "Actions",
-      flex: 1,
+      width: 100,
+      minWidth: 100,
       sortable: false,
       filter: false,
       pinned: "right",
