@@ -45,8 +45,11 @@ export const Sidebar = ({ payload }: SidebarProps) => {
     transition-all duration-300 ease-in-out z-50
   `;
 
+  // On mobile, if the drawer is open, we NEVER want to show the collapsed state.
+  const effectiveIsCollapsed = isCollapsed && !isMobileOpen;
+
   // Desktop widths
-  const desktopWidth = isCollapsed ? "w-[72px]" : "w-64";
+  const desktopWidth = effectiveIsCollapsed ? "w-[72px]" : "w-64";
   
   // Mobile drawer logic
   const mobileClasses = isMobileOpen 
@@ -69,13 +72,13 @@ export const Sidebar = ({ payload }: SidebarProps) => {
           onClick={toggleCollapse}
           className="hidden md:flex absolute -right-3.5 top-6 h-7 w-7 bg-white border border-neutral-200 rounded-full items-center justify-center text-neutral-500 hover:text-neutral-900 shadow-sm z-10 transition-colors"
         >
-          {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {effectiveIsCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
 
         {/* Header */}
-        <div className={`h-14 flex items-center border-b border-neutral-200 ${isCollapsed ? 'justify-center px-0' : 'px-6 gap-3'} md:transition-all`}>
-          <GraduationCap className={`h-6 w-6 text-neutral-900 shrink-0 ${isCollapsed ? 'ml-0' : ''}`} />
-          {!isCollapsed && (
+        <div className={`h-14 flex items-center border-b border-neutral-200 ${effectiveIsCollapsed ? 'justify-center px-0' : 'px-6 gap-3'} md:transition-all`}>
+          <GraduationCap className={`h-6 w-6 text-neutral-900 shrink-0 ${effectiveIsCollapsed ? 'ml-0' : ''}`} />
+          {!effectiveIsCollapsed && (
             <span className="text-sm font-semibold text-neutral-900 tracking-tight whitespace-nowrap overflow-hidden">
               University System
             </span>
@@ -90,15 +93,15 @@ export const Sidebar = ({ payload }: SidebarProps) => {
         </div>
 
         {/* Navigation Sections */}
-        <SidebarNav isCollapsed={isCollapsed} />
+        <SidebarNav isCollapsed={effectiveIsCollapsed} />
 
         {/* Footer */}
-        <div className={`p-4 border-t border-neutral-200 flex items-center ${isCollapsed ? 'flex-col gap-3' : 'justify-between gap-3'}`}>
-          <div className={`flex items-center gap-3 overflow-hidden ${isCollapsed ? 'justify-center w-full' : ''}`}>
+        <div className={`p-4 border-t border-neutral-200 flex items-center ${effectiveIsCollapsed ? 'flex-col gap-3' : 'justify-between gap-3'}`}>
+          <div className={`flex items-center gap-3 overflow-hidden ${effectiveIsCollapsed ? 'justify-center w-full' : ''}`}>
             <div className="h-9 w-9 rounded-md border border-neutral-200 flex items-center justify-center text-xs font-semibold text-neutral-900 shrink-0 uppercase tracking-wider bg-neutral-50">
               {initials}
             </div>
-            {!isCollapsed && (
+            {!effectiveIsCollapsed && (
               <div className="flex flex-col overflow-hidden text-left">
                 <span className="text-sm font-medium text-neutral-900 truncate">
                   {name}
