@@ -61,9 +61,10 @@ interface NavigationLinkProps {
   label: string;
   icon?: IconName;
   exact?: boolean;
+  isCollapsed?: boolean;
 }
 
-export const NavigationLink = ({ href, label, icon, exact = false }: NavigationLinkProps) => {
+export const NavigationLink = ({ href, label, icon, exact = false, isCollapsed = false }: NavigationLinkProps) => {
   const pathname = usePathname();
   const Icon = icon ? iconMap[icon] : undefined;
   
@@ -74,7 +75,10 @@ export const NavigationLink = ({ href, label, icon, exact = false }: NavigationL
   return (
     <Link
       href={href as React.ComponentProps<typeof Link>["href"]}
-      className={`flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-150 ease-in-out cursor-pointer select-none ${
+      title={isCollapsed ? label : undefined}
+      className={`flex items-center rounded-md transition-all duration-150 ease-in-out cursor-pointer select-none ${
+        isCollapsed ? 'justify-center p-2' : 'gap-2.5 px-3 py-2 text-sm'
+      } ${
         isActive
           ? "bg-neutral-100 text-neutral-900 font-medium"
           : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-50"
@@ -82,12 +86,12 @@ export const NavigationLink = ({ href, label, icon, exact = false }: NavigationL
     >
       {Icon && (
         <Icon 
-          className={`h-4 w-4 shrink-0 transition-colors ${
+          className={`shrink-0 transition-colors ${isCollapsed ? 'h-5 w-5' : 'h-4 w-4'} ${
             isActive ? "text-neutral-900" : "text-neutral-400 group-hover:text-neutral-900"
           }`} 
         />
       )}
-      <span>{label}</span>
+      {!isCollapsed && <span>{label}</span>}
     </Link>
   );
 };

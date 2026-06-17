@@ -17,7 +17,11 @@ interface SidebarSection {
   items: SidebarItem[];
 }
 
-export const SidebarNav = () => {
+interface SidebarNavProps {
+  isCollapsed: boolean;
+}
+
+export const SidebarNav = ({ isCollapsed }: SidebarNavProps) => {
   const { hasPermission } = usePermissions();
 
   const sections: SidebarSection[] = useMemo(
@@ -87,13 +91,20 @@ export const SidebarNav = () => {
   }, [sections, hasPermission]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-8 scrollbar-thin scrollbar-thumb-neutral-200 scrollbar-track-transparent">
+    <div className={`flex-1 overflow-y-auto py-6 flex flex-col gap-8 scrollbar-thin scrollbar-thumb-neutral-200 scrollbar-track-transparent ${isCollapsed ? 'px-2' : 'px-4'}`}>
       {visibleSections.map((section) => (
         <div key={section.title} className="flex flex-col gap-2">
-          <h3 className="px-2 text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-            {section.title}
-          </h3>
-          <div className="flex flex-col gap-1">
+          {!isCollapsed && (
+            <h3 className="px-2 text-[10px] font-bold text-neutral-400 uppercase tracking-widest whitespace-nowrap">
+              {section.title}
+            </h3>
+          )}
+          {isCollapsed && (
+            <div className="w-full flex justify-center">
+              <div className="h-px w-6 bg-neutral-200 my-1" />
+            </div>
+          )}
+          <div className={`flex flex-col ${isCollapsed ? 'gap-2 items-center' : 'gap-1'}`}>
             {section.items.map((item) => (
               <NavigationLink
                 key={item.href}
@@ -101,6 +112,7 @@ export const SidebarNav = () => {
                 label={item.label}
                 icon={item.icon}
                 exact={item.exact}
+                isCollapsed={isCollapsed}
               />
             ))}
           </div>
