@@ -1,4 +1,4 @@
-﻿import { apiClient } from "@/shared/api/client";
+import { apiClient } from "@/shared/api/client";
 import { getJwtPayload } from "@/shared/auth/jwt";
 import { StudentProfileCard } from "@/entities/student";
 import { cookies } from "next/headers";
@@ -27,8 +27,6 @@ export const StudentProfileOverview = async () => {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    // 🔥 ЖЕСТКО УКАЗЫВАЕМ КОРЕНЬ БЕЗ /api/v1, чтобы избежать дублирования
-    baseUrl: "http://127.0.0.1:8888", 
     cache: "no-store",
   });
 
