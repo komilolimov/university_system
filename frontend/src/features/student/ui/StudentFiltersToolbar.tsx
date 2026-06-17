@@ -46,10 +46,10 @@ export const StudentFiltersToolbar: React.FC<
   };
 
   return (
-    <div className="flex flex-col gap-3 w-full bg-white p-3 rounded-lg border border-neutral-200 shadow-sm select-none">
+    <div className="flex flex-col md:flex-row md:items-center gap-3 w-full bg-white p-3 rounded-lg border border-neutral-200 shadow-sm select-none">
       
       {/* Search Bar & Mobile Filter Toggle */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 w-full md:flex-1">
         <div className="relative flex-1">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-4 w-4 text-neutral-400" />
@@ -84,7 +84,7 @@ export const StudentFiltersToolbar: React.FC<
       {/* Filters Container (Desktop inline, Mobile Drawer) */}
       <div className={`
         ${isMobileFiltersOpen ? 'fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl p-5 shadow-2xl flex flex-col gap-4 animate-in slide-in-from-bottom-full duration-200' : 'hidden'}
-        md:relative md:flex md:flex-row md:items-center md:gap-3 md:bg-transparent md:p-0 md:shadow-none md:z-auto
+        md:relative md:flex md:flex-row md:items-center md:gap-3 md:bg-transparent md:p-0 md:shadow-none md:z-auto md:w-auto
       `}>
         
         {/* Mobile Drawer Header */}
