@@ -10,10 +10,10 @@ export const TestCredentials = () => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const pathname = usePathname();
 
-  // Защита 1: Не показываем в продакшене
-  if (process.env.NODE_ENV !== "development") {
-    return null;
-  }
+  // Защита 1: Не показываем в продакшене (Закомментировано, чтобы было видно на Vercel)
+  // if (process.env.NODE_ENV !== "development") {
+  //   return null;
+  // }
 
   // Защита 2: Показываем ТОЛЬКО на странице логина
 // Защита 2: Показываем ТОЛЬКО на странице логина
